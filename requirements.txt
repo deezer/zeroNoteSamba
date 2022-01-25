@@ -1,0 +1,18 @@
+# Repo dependencies
+PyYAML==5.4.1
+numpy
+soundfile
+spleeter==2.2.2
+matplotlib
+torch 
+torchvision
+torchsummary
+tqdm
+mir_eval
+ffmpeg-python
+librosa==0.8.0
+nnAudio
+pathlib
+jams
+antropy
+openpyxl
