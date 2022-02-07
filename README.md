@@ -106,17 +106,17 @@ plt.show()
 
 The result should resemble the following output:
 
-- Overlapped Embeddings
+- overlapped embeddings
 <p align="center">
         <img src="https://github.com/deezer/zeroNoteSamba/blob/main/images/overlapped.png" width="800">
 </p>
 
-- Overlapped Percussive Signal and Embedding
+- overlapped percussive signal and embedding
 <p align="center">
         <img src="https://github.com/deezer/zeroNoteSamba/blob/main/images/p_emb_sig.png" width="800">
 </p>
 
-- Overlapped Non-percussive Signal and Embedding
+- overlapped non-percussive signal and embedding
 <p align="center">
         <img src="https://github.com/deezer/zeroNoteSamba/blob/main/images/np_emb_sig.png" width="800">
 </p>
@@ -127,7 +127,7 @@ The pretext task code can be found in `pretext.py` and `fma_loader.py`. All proc
 - beat tracking: `beat_down.py`.
 - cross-dataset generalization: `cross_data.py`.
 - few-shot beat tracking: `data_exp.py`.
-The code for information-theoretic measures on ZeroNS network can be found in `measures.py` and librosa's beat tracking method is in `old_school.py`. Finally, one can find the model and processing code in `models/` and `processing`.
+The code for information-theoretic measures on ZeroNS network can be found in `measures.py` and librosa's beat tracking method is in `old_school.py`. Finally, one can find the model and processing code in `models/` and `processing/`.
 
 ## Reference
 
