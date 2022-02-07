@@ -23,13 +23,15 @@ after cloning into the repository. One can then get started with the following P
 # Import functions and packages
 import torch
 import librosa
+import processing.input_rep as IR
+from models.models import Down_CNN
 from spleeter.separator import Separator
 
 # Run Spleeter and create percussive and non-percussive tracks
 separator = Separator('spleeter:4stems')
 
-y, _ = librosa.load('/path/to/music/file', sr=44100)
-stems = separator.separate(waveform=y)
+y, _ = librosa.load('audio_example.mp3', sr=44100, mono=True)
+stems = separator.separate(waveform=y.reshape((len(y), 1)))
 
 drums = (stems['drums'][:, 0] + stems['drums'][:, 1]) / 2
 other = (stems['other'][:, 0] + stems['other'][:, 1] \
@@ -39,12 +41,12 @@ other = (stems['other'][:, 0] + stems['other'][:, 1] \
 drums = librosa.resample(drums, 44100, 16000)
 other = librosa.resample(other, 44100, 16000)
 
-drums_tensor = drums.reshape((1, 1, drums.shape[0], musdb.shape[1]))
-other_tensor = other.reshape((1, 1, other.shape[0], musdb.shape[1]))
-
 # Generate VQTs
-vqt_postve = torch.from_numpy(IR.generate_XQT(drums_tensor, 16000, 'vqt'))
-vqt_anchor = torch.from_numpy(IR.generate_XQT(other_tensor, 16000, 'vqt'))
+vqt_postve = torch.from_numpy(IR.generate_XQT(drums, 16000, 'vqt'))
+vqt_anchor = torch.from_numpy(IR.generate_XQT(other, 16000, 'vqt'))
+
+vqt_postve = vqt_postve.reshape(1, 1, vqt_postve.shape[0], vqt_postve.shape[1])
+vqt_anchor = vqt_anchor.reshape(1, 1, vqt_anchor.shape[0], vqt_anchor.shape[1])
 
 # Load pretext task model weights
 device = torch.device('cpu')
