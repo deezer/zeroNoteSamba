@@ -1,6 +1,6 @@
 # Zero-Note Samba: Self-Supervised Beat Tracking
 
-![flowchart](https://github.com/deezer/zeroNoteSamba/blob/main/images/flowchart.pdf)
+![flowchart](images/flowchart.pdf)
 
 by [Dorian Desblancs](https://www.linkedin.com/in/dorian-desblancs), [Vincent Lostanlen](https://www.lostanlen.com/), and [Romain Hennequin](http://romain-hennequin.fr/En/index.html).
 
@@ -105,13 +105,13 @@ plt.show()
 The result should resemble the following output:
 
 - Overlapped Embeddings
-![overlapped](/images/overlapped.pdf)
+![overlapped](images/overlapped.pdf)
 
 - Overlapped Percussive Signal and Embedding
-![p_emb_sig](/images/p_emb_sig.pdf)
+![p_emb_sig](images/p_emb_sig.pdf)
 
 - Overlapped Non-percussive Signal and Embedding
-![np_emb_sig](/images/np_emb_sig.pdf)
+![np_emb_sig](images/np_emb_sig.pdf)
 
 ## Advanced Usage
 
