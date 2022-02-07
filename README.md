@@ -27,6 +27,7 @@ unzip models/saved/shift_pret_cnn_16.pth.zip -d models/saved/
 # Download sample audio example
 wget https://github.com/deezer/spleeter/raw/master/audio_example.mp3
 ```
+Note that Spleeter dependencies can be a little tricky to install. Please consult the package's [repository](https://github.com/deezer/spleeter) for proper installation instructions.
 
 One can then get started with the following Python code snippet in order to explore the trained model's outputs:
 
@@ -76,20 +77,20 @@ The resulting embeddings should resemble the following outputs:
 
 - overlapped embeddings.
 <p align="center">
-        <img src="https://github.com/deezer/zeroNoteSamba/blob/main/images/overlapped.png" width="700">
+        <img src="https://github.com/deezer/zeroNoteSamba/blob/main/images/overlapped.png" width="600">
 </p>
 
 - overlapped percussive signal and embedding.
 <p align="center">
-        <img src="https://github.com/deezer/zeroNoteSamba/blob/main/images/p_emb_sig.png" width="700">
+        <img src="https://github.com/deezer/zeroNoteSamba/blob/main/images/p_emb_sig.png" width="600">
 </p>
 
 - overlapped non-percussive signal and embedding.
 <p align="center">
-        <img src="https://github.com/deezer/zeroNoteSamba/blob/main/images/np_emb_sig.png" width="700">
+        <img src="https://github.com/deezer/zeroNoteSamba/blob/main/images/np_emb_sig.png" width="600">
 </p>
 
-The above scripts can be found by running this [Colab notebook](https://colab.research.google.com/drive/1bdS_-SSQJalvLVNT4rtMRNeKFDuFnCAR?usp=sharing#scrollTo=avSYHOHNJEg-).
+The above script and code for plotting the embeddings can be found by running this [Colab notebook](https://colab.research.google.com/drive/1bdS_-SSQJalvLVNT4rtMRNeKFDuFnCAR?usp=sharing#scrollTo=avSYHOHNJEg-).
 
 ## Advanced Usage
 
