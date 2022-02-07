@@ -12,13 +12,23 @@ This repository contains the code used to generate the ZeroNS results. All exper
 
 ## Getting Started
 
-In order to explore the embeddings output by our ZeroNS model, one can install all the dependencies using 
+In order to explore the embeddings output by our ZeroNS model, one can start with the following:
 ```bash
+# Clone and enter repository
+git clone https://github.com/deezer/zeroNoteSamba.git
+cd zeroNoteSamba
+
+# Install dependencies
 pip install -r requirements.txt
+
+# Unzip model weights file
 unzip models/saved/shift_pret_cnn_16.pth.zip -d models/saved/
+
+# Download sample audio example
+wget https://github.com/deezer/spleeter/raw/master/audio_example.mp3
 ```
 
-after cloning into the repository. One can then get started with the following Python code snippet in order to explore the trained model's outputs:
+One can then get started with the following Python code snippet in order to explore the trained model's outputs:
 
 ```python
 # Import functions and packages
@@ -79,7 +89,7 @@ The resulting embeddings should resemble the following outputs:
         <img src="https://github.com/deezer/zeroNoteSamba/blob/main/images/np_emb_sig.png" width="700">
 </p>
 
-More code for getting started can be found in `drum_playground.ipynb` notebook.
+The above scripts can be found by running this [Colab notebook](https://colab.research.google.com/drive/1bdS_-SSQJalvLVNT4rtMRNeKFDuFnCAR?usp=sharing#scrollTo=avSYHOHNJEg-).
 
 ## Advanced Usage
 
@@ -88,7 +98,7 @@ The pretext task code can be found in `pretext.py` and `fma_loader.py`. All data
 - cross-dataset generalization: `cross_data.py`.
 - few-shot beat tracking: `data_exp.py`.
 
-The code for information-theoretic measures on the ZeroNS network can be found in `measures.py` and librosa's beat tracking method is in `old_school.py`. Finally, one can find the model and processing code in `models/` and `processing/`.
+The code to generate the information-theoretic measures of ZeroNS network embeddings can be found in `measures.py` and librosa's beat tracking method is in `old_school.py`. Finally, one can find the model and processing code in `models/` and `processing/`.
 
 ## Reference
 
