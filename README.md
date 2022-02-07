@@ -1,14 +1,14 @@
 # Zero-Note Samba: Self-Supervised Beat Tracking
 
 <p align="center">
-        <img src="https://github.com/deezer/zeroNoteSamba/blob/main/images/flowchart.png" width="400">
+        <img src="https://github.com/deezer/zeroNoteSamba/blob/main/images/flowchart.png" width="300">
 </p>
 
 by [Dorian Desblancs](https://www.linkedin.com/in/dorian-desblancs), [Vincent Lostanlen](https://www.lostanlen.com/), and [Romain Hennequin](http://romain-hennequin.fr/En/index.html).
 
 ## About
 
-This repository contains the code used to generate the ZeroNS results. All experiment settings can be found in the `configuration/config.yaml` file. These include learning rates and evaluation modes for each downstream dataset, for example. For the pretext task, one can change the batch size and temperature parameters, among other elements.
+This repository contains the code used to generate the ZeroNS results. All experiment settings can be found in the `configuration/config.yaml` file. These include learning rates and evaluation modes for each downstream dataset, for example. For the pretext task, one can change the batch size and temperature parameters among other elements.
 
 ## Getting Started
 
@@ -59,19 +59,19 @@ non_percussive = model.pretext.anchor(vqt_anchor.float())
 combined = model(vqt_anchor.float(), vqt_postve.float())
 ```
 
-The embeddings should resemble the following outputs:
+The resulting embeddings should resemble the following outputs:
 
-- overlapped embeddings
+- overlapped embeddings.
 <p align="center">
         <img src="https://github.com/deezer/zeroNoteSamba/blob/main/images/overlapped.png" width="700">
 </p>
 
-- overlapped percussive signal and embedding
+- overlapped percussive signal and embedding.
 <p align="center">
         <img src="https://github.com/deezer/zeroNoteSamba/blob/main/images/p_emb_sig.png" width="700">
 </p>
 
-- overlapped non-percussive signal and embedding
+- overlapped non-percussive signal and embedding.
 <p align="center">
         <img src="https://github.com/deezer/zeroNoteSamba/blob/main/images/np_emb_sig.png" width="700">
 </p>
@@ -80,7 +80,7 @@ More code for getting started can be found in `drum_playground.ipynb` notebook.
 
 ## Advanced Usage
 
-The pretext task code can be found in `pretext.py` and `fma_loader.py`. All processing for downstream tasks can be found in `ballroom.py`, `gtzan.py`, `hainsworth.py`, and `smc_mirex.py`. All downstream tasks can be found in the following:
+The pretext task code can be found in `pretext.py` and `fma_loader.py`. All dataset processing for beat-tracking-related tasks can be found in `ballroom.py`, `gtzan.py`, `hainsworth.py`, and `smc_mirex.py`. All downstream tasks can be found in the following:
 - beat tracking: `beat_down.py`.
 - cross-dataset generalization: `cross_data.py`.
 - few-shot beat tracking: `data_exp.py`.
