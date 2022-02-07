@@ -23,7 +23,6 @@ after cloning into the repository. One can then get started with the following P
 # Import functions and packages
 import torch
 import librosa
-import IPython.display as ipd
 from spleeter.separator import Separator
 
 # Run Spleeter and create percussive and non-percussive tracks
@@ -64,17 +63,17 @@ The embeddings should resemble the following outputs:
 
 - overlapped embeddings
 <p align="center">
-        <img src="https://github.com/deezer/zeroNoteSamba/blob/main/images/overlapped.png" width="800">
+        <img src="https://github.com/deezer/zeroNoteSamba/blob/main/images/overlapped.png" width="700">
 </p>
 
 - overlapped percussive signal and embedding
 <p align="center">
-        <img src="https://github.com/deezer/zeroNoteSamba/blob/main/images/p_emb_sig.png" width="800">
+        <img src="https://github.com/deezer/zeroNoteSamba/blob/main/images/p_emb_sig.png" width="700">
 </p>
 
 - overlapped non-percussive signal and embedding
 <p align="center">
-        <img src="https://github.com/deezer/zeroNoteSamba/blob/main/images/np_emb_sig.png" width="800">
+        <img src="https://github.com/deezer/zeroNoteSamba/blob/main/images/np_emb_sig.png" width="700">
 </p>
 
 More code for getting started can be found in `drum_playground.ipynb` notebook.
