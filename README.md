@@ -15,7 +15,7 @@ This repository contains the code used to generate the ZeroNS results. All exper
 In order to explore the embeddings output by our ZeroNS model, one can install all the dependencies using 
 ```bash
 pip install -r requirements.txt
-!unzip models/saved/shift_pret_cnn_16.pth.zip -d models/saved/
+unzip models/saved/shift_pret_cnn_16.pth.zip -d models/saved/
 ```
 
 after cloning into the repository. One can then get started with the following Python code snippet in order to explore the trained model's outputs:
