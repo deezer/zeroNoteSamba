@@ -1,6 +1,6 @@
 # Zero-Note Samba: Self-Supervised Beat Tracking
 
-<img src="https://github.com/deezer/zeroNoteSamba/blob/main/images/flowchart.png" width="350">
+<img src="https://github.com/deezer/zeroNoteSamba/blob/main/images/flowchart.png" width="500">
 
 by [Dorian Desblancs](https://www.linkedin.com/in/dorian-desblancs), [Vincent Lostanlen](https://www.lostanlen.com/), and [Romain Hennequin](http://romain-hennequin.fr/En/index.html).
 
