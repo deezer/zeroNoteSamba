@@ -58,53 +58,9 @@ model.eval()
 percussive = model.pretext.postve(vqt_postve.float())
 non_percussive = model.pretext.anchor(vqt_anchor.float())
 combined = model(vqt_anchor.float(), vqt_postve.float())
-
-# Play each track
-ipd.display(ipd.Audio(drums, rate=16000))
-ipd.display(ipd.Audio(other, rate=16000))
-ipd.display(ipd.Audio(librosa.resample(y, 44100, 16000), rate=16000))
-
-# Plot overlapped signals
-vqt_len = vqt_postve.shape[1]
-
-plt.plot(non_percussive.detach().numpy().reshape(vqt_len))
-plt.plot(percussive.detach().numpy().reshape(vqt_len))
-plt.title("Overlapped Embeddings")
-plt.legend(["Non-percussive", "Percussive"])
-plt.xlabel("Time (samples)")
-plt.ylabel("Amplitude")
-plt.grid(True)
-plt.ylim((-0.1, 1))
-plt.yticks([0., 0.25, 0.5, 0.75, 1.0])
-plt.show()
-
-x1 = np.linspace(0, 10, 10 * 16000)
-x2 = np.linspace(0, 10, vqt_len)
-
-plt.plot(x1, drums)
-plt.plot(x2, percussive.detach().numpy().reshape(vqt_len))
-plt.title("Overlapped Percussive Signal and Embedding")
-plt.legend(["Signal", "Embedding"])
-plt.xlabel("Time (s)")
-plt.ylabel("Amplitude")
-plt.grid(True)
-plt.ylim((-1, 1))
-plt.yticks([-1.0, -0.5, 0., 0.5, 1.0])
-plt.show()
-
-plt.plot(x1, others)
-plt.plot(x2, non_percussive.detach().numpy().reshape(vqt_len))
-plt.title("Overlapped Non-percussive Signal and Embedding")
-plt.legend(["Signal", "Embedding"])
-plt.xlabel("Time (s)")
-plt.ylabel("Amplitude")
-plt.grid(True)
-plt.ylim((-1, 1))
-plt.yticks([-1.0, -0.5, 0., 0.5, 1.0])
-plt.show()
 ```
 
-The result should resemble the following output:
+The embeddings should resemble the following outputs:
 
 - overlapped embeddings
 <p align="center">
@@ -120,6 +76,8 @@ The result should resemble the following output:
 <p align="center">
         <img src="https://github.com/deezer/zeroNoteSamba/blob/main/images/np_emb_sig.png" width="800">
 </p>
+
+More code for getting started can be found in `drum_playground.ipynb` notebook.
 
 ## Advanced Usage
 
