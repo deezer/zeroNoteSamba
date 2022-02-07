@@ -1,23 +1,24 @@
 import numpy as np
 import librosa as audio_lib
 
+
 def convert_to_mono(signal):
     """
     Converts signal to mono.
     -- signal : 2D array with shape = 2 in dim1 or dim2
     """
-    if (len(signal.shape) == 2):
-        if (signal.shape[0] == 1):
+    if len(signal.shape) == 2:
+        if signal.shape[0] == 1:
             signal = np.reshape(signal, signal.shape[1])
-        elif (signal.shape[1] == 1):
+        elif signal.shape[1] == 1:
             signal = np.reshape(signal, signal.shape[0])
-        elif (signal.shape[0] == 2):
+        elif signal.shape[0] == 2:
             signal = (signal[0, :] + signal[1, :]) / 2
         else:
             signal = (signal[:, 0] + signal[:, 1]) / 2
 
     else:
-        raise("Signal is one-dimensional or 3D+!")
+        raise ("Signal is one-dimensional or 3D+!")
 
     return signal
 
@@ -28,7 +29,7 @@ def convert_to_xxhz(f, sample_rate):
     -- f            : file name
     -- sample_rate  : new sample rate
     """
-    if (f.endswith(".wav") or f.endswith(".mp3")):
+    if f.endswith(".wav") or f.endswith(".mp3"):
         y, _ = audio_lib.load(f, sr=sample_rate)
 
         return y
