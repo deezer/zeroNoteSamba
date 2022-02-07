@@ -107,13 +107,19 @@ plt.show()
 The result should resemble the following output:
 
 - Overlapped Embeddings
-![overlapped](./images/overlapped.png)
+<p align="center">
+        <img src="https://github.com/deezer/zeroNoteSamba/blob/main/images/overlapped.png" width="600">
+</p>
 
 - Overlapped Percussive Signal and Embedding
-![p_emb_sig](./images/p_emb_sig.png)
+<p align="center">
+        <img src="https://github.com/deezer/zeroNoteSamba/blob/main/images/p_emb_sig.png" width="600">
+</p>
 
 - Overlapped Non-percussive Signal and Embedding
-![np_emb_sig](./images/np_emb_sig.png)
+<p align="center">
+        <img src="https://github.com/deezer/zeroNoteSamba/blob/main/images/np_emb_sig.png" width="600">
+</p>
 
 ## Advanced Usage
 
