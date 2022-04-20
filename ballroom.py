@@ -230,67 +230,67 @@ if __name__ == "__main__":
 
             idx += 1
 
-        with open("Ballroom/wavs.pkl", "wb") as handle:
+        with open("data/Ballroom/wavs.pkl", "wb") as handle:
             pickle.dump(wavs, handle, pickle.HIGHEST_PROTOCOL)
 
         if ballroom_status == "pretrained":
-            with open("Ballroom/signals_spleeted.pkl", "wb") as handle:
+            with open("data/Ballroom/signals_spleeted.pkl", "wb") as handle:
                 pickle.dump(signals, handle, pickle.HIGHEST_PROTOCOL)
 
         else:
-            with open("Ballroom/signals_original.pkl", "wb") as handle:
+            with open("data/Ballroom/signals_original.pkl", "wb") as handle:
                 pickle.dump(signals, handle, pickle.HIGHEST_PROTOCOL)
 
-        with open("Ballroom/beat_pulses.pkl", "wb") as handle:
+        with open("data/Ballroom/beat_pulses.pkl", "wb") as handle:
             pickle.dump(beat_pulse, handle, pickle.HIGHEST_PROTOCOL)
 
-        with open("Ballroom/down_pulses.pkl", "wb") as handle:
+        with open("data/Ballroom/down_pulses.pkl", "wb") as handle:
             pickle.dump(down_pulse, handle, pickle.HIGHEST_PROTOCOL)
 
-        with open("Ballroom/real_beat_times.pkl", "wb") as handle:
+        with open("data/Ballroom/real_beat_times.pkl", "wb") as handle:
             pickle.dump(real_beat_times, handle, pickle.HIGHEST_PROTOCOL)
 
-        with open("Ballroom/real_down_times.pkl", "wb") as handle:
+        with open("data/Ballroom/real_down_times.pkl", "wb") as handle:
             pickle.dump(real_down_times, handle, pickle.HIGHEST_PROTOCOL)
 
         if ballroom_status == "pretrained":
-            with open("Ballroom/vqts_spleeted.pkl", "wb") as handle:
+            with open("data/Ballroom/vqts_spleeted.pkl", "wb") as handle:
                 pickle.dump(vqts, handle, pickle.HIGHEST_PROTOCOL)
 
         else:
-            with open("Ballroom/vqts_original.pkl", "wb") as handle:
+            with open("data/Ballroom/vqts_original.pkl", "wb") as handle:
                 pickle.dump(vqts, handle, pickle.HIGHEST_PROTOCOL)
 
     else:
-        with open("Ballroom/wavs.pkl", "rb") as handle:
+        with open("data/Ballroom/wavs.pkl", "rb") as handle:
             wavs = pickle.load(handle)
 
         if ballroom_status == "pretrained":
-            with open("Ballroom/signals_spleeted.pkl", "rb") as handle:
+            with open("data/Ballroom/signals_spleeted.pkl", "rb") as handle:
                 signals = pickle.load(handle)
 
         else:
-            with open("Ballroom/signals_original.pkl", "rb") as handle:
+            with open("data/Ballroom/signals_original.pkl", "rb") as handle:
                 signals = pickle.load(handle)
 
-        with open("Ballroom/beat_pulses.pkl", "rb") as handle:
+        with open("data/Ballroom/beat_pulses.pkl", "rb") as handle:
             beat_pulse = pickle.load(handle)
 
-        with open("Ballroom/down_pulses.pkl", "rb") as handle:
+        with open("data/Ballroom/down_pulses.pkl", "rb") as handle:
             down_pulse = pickle.load(handle)
 
-        with open("Ballroom/real_beat_times.pkl", "rb") as handle:
+        with open("data/Ballroom/real_beat_times.pkl", "rb") as handle:
             real_beat_times = pickle.load(handle)
 
-        with open("Ballroom/real_down_times.pkl", "rb") as handle:
+        with open("data/Ballroom/real_down_times.pkl", "rb") as handle:
             real_down_times = pickle.load(handle)
 
         if ballroom_status == "pretrained":
-            with open("Ballroom/vqts_spleeted.pkl", "rb") as handle:
+            with open("data/Ballroom/vqts_spleeted.pkl", "rb") as handle:
                 vqts = pickle.load(handle)
 
         else:
-            with open("Ballroom/vqts_original.pkl", "rb") as handle:
+            with open("data/Ballroom/vqts_original.pkl", "rb") as handle:
                 vqts = pickle.load(handle)
 
     _exp = ymldict.get("ballroom_exp")

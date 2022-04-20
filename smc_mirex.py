@@ -64,7 +64,7 @@ if __name__ == "__main__":
 
         idx = 0
 
-        with open("SMC/smc_wavs.pkl", "wb") as handle:
+        with open("data/SMC/wavs.pkl", "wb") as handle:
             pickle.dump(wavs, handle, pickle.HIGHEST_PROTOCOL)
 
         for audio in wavs:
@@ -175,51 +175,51 @@ if __name__ == "__main__":
             idx += 1
 
         if smc_status == "pretrained":
-            with open("SMC/smc_signals_spleeted.pkl", "wb") as handle:
+            with open("data/SMC/signals_spleeted.pkl", "wb") as handle:
                 pickle.dump(signals, handle, pickle.HIGHEST_PROTOCOL)
 
         else:
-            with open("SMC/smc_signals_original.pkl", "wb") as handle:
+            with open("data/SMC/signals_original.pkl", "wb") as handle:
                 pickle.dump(signals, handle, pickle.HIGHEST_PROTOCOL)
 
-        with open("SMC/smc_pulses.pkl", "wb") as handle:
+        with open("data/SMC/pulses.pkl", "wb") as handle:
             pickle.dump(beat_pulse, handle, pickle.HIGHEST_PROTOCOL)
 
-        with open("SMC/smc_real_times.pkl", "wb") as handle:
+        with open("data/SMC/real_times.pkl", "wb") as handle:
             pickle.dump(real_beat_times, handle, pickle.HIGHEST_PROTOCOL)
 
         if smc_status == "pretrained":
-            with open("SMC/smc_vqts_spleeted.pkl", "wb") as handle:
+            with open("data/SMC/vqts_spleeted.pkl", "wb") as handle:
                 pickle.dump(vqts, handle, pickle.HIGHEST_PROTOCOL)
 
         else:
-            with open("SMC/smc_vqts_original.pkl", "wb") as handle:
+            with open("data/SMC/vqts_original.pkl", "wb") as handle:
                 pickle.dump(vqts, handle, pickle.HIGHEST_PROTOCOL)
 
     else:
-        with open("SMC/smc_wavs.pkl", "rb") as handle:
+        with open("data/SMC/wavs.pkl", "rb") as handle:
             wavs = pickle.load(handle)
 
         if smc_status == "pretrained":
-            with open("SMC/smc_signals_spleeted.pkl", "rb") as handle:
+            with open("data/SMC/signals_spleeted.pkl", "rb") as handle:
                 signals = pickle.load(handle)
 
         else:
-            with open("SMC/smc_signals_original.pkl", "rb") as handle:
+            with open("data/SMC/signals_original.pkl", "rb") as handle:
                 signals = pickle.load(handle)
 
-        with open("SMC/smc_pulses.pkl", "rb") as handle:
+        with open("data/SMC/pulses.pkl", "rb") as handle:
             beat_pulse = pickle.load(handle)
 
-        with open("SMC/smc_real_times.pkl", "rb") as handle:
+        with open("data/SMC/real_times.pkl", "rb") as handle:
             real_beat_times = pickle.load(handle)
 
         if smc_status == "pretrained":
-            with open("SMC/smc_vqts_spleeted.pkl", "rb") as handle:
+            with open("data/SMC/vqts_spleeted.pkl", "rb") as handle:
                 vqts = pickle.load(handle)
 
         else:
-            with open("SMC/smc_vqts_original.pkl", "rb") as handle:
+            with open("data/SMC/vqts_original.pkl", "rb") as handle:
                 vqts = pickle.load(handle)
 
     _exp = ymldict.get("smc_exp")

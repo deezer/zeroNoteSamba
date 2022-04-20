@@ -201,67 +201,67 @@ if __name__ == "__main__":
 
             idx += 1
 
-        with open("Hainsworth/wavs.pkl", "wb") as handle:
+        with open("data/Hainsworth/wavs.pkl", "wb") as handle:
             pickle.dump(wavs, handle, pickle.HIGHEST_PROTOCOL)
 
         if hainsworth_status == "pretrained":
-            with open("Hainsworth/signals_spleeted.pkl", "wb") as handle:
+            with open("data/Hainsworth/signals_spleeted.pkl", "wb") as handle:
                 pickle.dump(signals, handle, pickle.HIGHEST_PROTOCOL)
 
         else:
-            with open("Hainsworth/signals_original.pkl", "wb") as handle:
+            with open("data/Hainsworth/signals_original.pkl", "wb") as handle:
                 pickle.dump(signals, handle, pickle.HIGHEST_PROTOCOL)
 
-        with open("Hainsworth/beat_pulses.pkl", "wb") as handle:
+        with open("data/Hainsworth/beat_pulses.pkl", "wb") as handle:
             pickle.dump(beat_pulse, handle, pickle.HIGHEST_PROTOCOL)
 
-        with open("Hainsworth/down_pulses.pkl", "wb") as handle:
+        with open("data/Hainsworth/down_pulses.pkl", "wb") as handle:
             pickle.dump(down_pulse, handle, pickle.HIGHEST_PROTOCOL)
 
-        with open("Hainsworth/real_beat_times.pkl", "wb") as handle:
+        with open("data/Hainsworth/real_beat_times.pkl", "wb") as handle:
             pickle.dump(real_beat_times, handle, pickle.HIGHEST_PROTOCOL)
 
-        with open("Hainsworth/real_down_times.pkl", "wb") as handle:
+        with open("data/Hainsworth/real_down_times.pkl", "wb") as handle:
             pickle.dump(real_down_times, handle, pickle.HIGHEST_PROTOCOL)
 
         if hainsworth_status == "pretrained":
-            with open("Hainsworth/vqts_spleeted.pkl", "wb") as handle:
+            with open("data/Hainsworth/vqts_spleeted.pkl", "wb") as handle:
                 pickle.dump(vqts, handle, pickle.HIGHEST_PROTOCOL)
 
         else:
-            with open("Hainsworth/vqts_original.pkl", "wb") as handle:
+            with open("data/Hainsworth/vqts_original.pkl", "wb") as handle:
                 pickle.dump(vqts, handle, pickle.HIGHEST_PROTOCOL)
 
     else:
-        with open("Hainsworth/wavs.pkl", "rb") as handle:
+        with open("data/Hainsworth/wavs.pkl", "rb") as handle:
             wavs = pickle.load(handle)
 
         if hainsworth_status == "pretrained":
-            with open("Hainsworth/signals_spleeted.pkl", "rb") as handle:
+            with open("data/Hainsworth/signals_spleeted.pkl", "rb") as handle:
                 signals = pickle.load(handle)
 
         else:
-            with open("Hainsworth/signals_original.pkl", "rb") as handle:
+            with open("data/Hainsworth/signals_original.pkl", "rb") as handle:
                 signals = pickle.load(handle)
 
-        with open("Hainsworth/beat_pulses.pkl", "rb") as handle:
+        with open("data/Hainsworth/beat_pulses.pkl", "rb") as handle:
             beat_pulse = pickle.load(handle)
 
-        with open("Hainsworth/down_pulses.pkl", "rb") as handle:
+        with open("data/Hainsworth/down_pulses.pkl", "rb") as handle:
             down_pulse = pickle.load(handle)
 
-        with open("Hainsworth/real_beat_times.pkl", "rb") as handle:
+        with open("data/Hainsworth/real_beat_times.pkl", "rb") as handle:
             real_beat_times = pickle.load(handle)
 
-        with open("Hainsworth/real_down_times.pkl", "rb") as handle:
+        with open("data/Hainsworth/real_down_times.pkl", "rb") as handle:
             real_down_times = pickle.load(handle)
 
         if hainsworth_status == "pretrained":
-            with open("Hainsworth/vqts_spleeted.pkl", "rb") as handle:
+            with open("data/Hainsworth/vqts_spleeted.pkl", "rb") as handle:
                 vqts = pickle.load(handle)
 
         else:
-            with open("Hainsworth/vqts_original.pkl", "rb") as handle:
+            with open("data/Hainsworth/vqts_original.pkl", "rb") as handle:
                 vqts = pickle.load(handle)
 
     _exp = ymldict.get("hainsworth_exp")

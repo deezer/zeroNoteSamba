@@ -35,8 +35,8 @@ if __name__ == "__main__":
         m = "spleeter:{}".format(model)
         separator = Separator(m)
 
-        al = os.listdir("GTZAN/")
-        bl = os.listdir("GTZAN-Rhythm_v2_ismir2015_lbd/jams")
+        al = os.listdir("gtzan/GTZAN/")
+        bl = os.listdir("gtzan/GTZAN-Rhythm_v2_ismir2015_lbd/jams")
 
         signals = {}
         beat_pulse = {}
@@ -52,10 +52,10 @@ if __name__ == "__main__":
             if "mf" in el:
                 continue
             else:
-                wav_fps = os.listdir("GTZAN/" + el)
+                wav_fps = os.listdir("gtzan/GTZAN/" + el)
 
                 for fp in wav_fps:
-                    full_fp = "GTZAN/" + el + "/" + fp
+                    full_fp = "gtzan/GTZAN/" + el + "/" + fp
 
                     wavs.append(fp)
 
@@ -160,7 +160,7 @@ if __name__ == "__main__":
                             d_pulse = torch.zeros(VQT.shape[1])
                             b_pulse = torch.zeros(VQT.shape[1])
 
-                    beats = "GTZAN-Rhythm_v2_ismir2015_lbd/jams/" + fp + ".jams"
+                    beats = "gtzan/GTZAN-Rhythm_v2_ismir2015_lbd/jams/" + fp + ".jams"
 
                     jam_temp = jams.load(beats).search(namespace="beat")
 
@@ -208,67 +208,67 @@ if __name__ == "__main__":
 
                     idx += 1
 
-        with open("GTZAN/wavs.pkl", "wb") as handle:
+        with open("data/GTZAN/wavs.pkl", "wb") as handle:
             pickle.dump(wavs, handle, pickle.HIGHEST_PROTOCOL)
 
         if gtzan_status == "pretrained":
-            with open("GTZAN/signals_spleeted.pkl", "wb") as handle:
+            with open("data/GTZAN/signals_spleeted.pkl", "wb") as handle:
                 pickle.dump(signals, handle, pickle.HIGHEST_PROTOCOL)
 
         else:
-            with open("GTZAN/signals_original.pkl", "wb") as handle:
+            with open("data/GTZAN/signals_original.pkl", "wb") as handle:
                 pickle.dump(signals, handle, pickle.HIGHEST_PROTOCOL)
 
-        with open("GTZAN/beat_pulses.pkl", "wb") as handle:
+        with open("data/GTZAN/beat_pulses.pkl", "wb") as handle:
             pickle.dump(beat_pulse, handle, pickle.HIGHEST_PROTOCOL)
 
-        with open("GTZAN/down_pulses.pkl", "wb") as handle:
+        with open("data/GTZAN/down_pulses.pkl", "wb") as handle:
             pickle.dump(down_pulse, handle, pickle.HIGHEST_PROTOCOL)
 
-        with open("GTZAN/real_beat_times.pkl", "wb") as handle:
+        with open("data/GTZAN/real_beat_times.pkl", "wb") as handle:
             pickle.dump(real_beat_times, handle, pickle.HIGHEST_PROTOCOL)
 
-        with open("GTZAN/real_down_times.pkl", "wb") as handle:
+        with open("data/GTZAN/real_down_times.pkl", "wb") as handle:
             pickle.dump(real_down_times, handle, pickle.HIGHEST_PROTOCOL)
 
         if gtzan_status == "pretrained":
-            with open("GTZAN/vqts_spleeted.pkl", "wb") as handle:
+            with open("data/GTZAN/vqts_spleeted.pkl", "wb") as handle:
                 pickle.dump(vqts, handle, pickle.HIGHEST_PROTOCOL)
 
         else:
-            with open("GTZAN/vqts_original.pkl", "wb") as handle:
+            with open("data/GTZAN/vqts_original.pkl", "wb") as handle:
                 pickle.dump(vqts, handle, pickle.HIGHEST_PROTOCOL)
 
     else:
-        with open("GTZAN/wavs.pkl", "rb") as handle:
+        with open("data/GTZAN/wavs.pkl", "rb") as handle:
             wavs = pickle.load(handle)
 
         if gtzan_status == "pretrained":
-            with open("GTZAN/signals_spleeted.pkl", "rb") as handle:
+            with open("data/GTZAN/signals_spleeted.pkl", "rb") as handle:
                 signals = pickle.load(handle)
 
         else:
-            with open("GTZAN/signals_original.pkl", "rb") as handle:
+            with open("data/GTZAN/signals_original.pkl", "rb") as handle:
                 signals = pickle.load(handle)
 
-        with open("GTZAN/beat_pulses.pkl", "rb") as handle:
+        with open("data/GTZAN/beat_pulses.pkl", "rb") as handle:
             beat_pulse = pickle.load(handle)
 
-        with open("GTZAN/down_pulses.pkl", "rb") as handle:
+        with open("data/GTZAN/down_pulses.pkl", "rb") as handle:
             down_pulse = pickle.load(handle)
 
-        with open("GTZAN/real_beat_times.pkl", "rb") as handle:
+        with open("data/GTZAN/real_beat_times.pkl", "rb") as handle:
             real_beat_times = pickle.load(handle)
 
-        with open("GTZAN/real_down_times.pkl", "rb") as handle:
+        with open("data/GTZAN/real_down_times.pkl", "rb") as handle:
             real_down_times = pickle.load(handle)
 
         if gtzan_status == "pretrained":
-            with open("GTZAN/vqts_spleeted.pkl", "rb") as handle:
+            with open("data/GTZAN/vqts_spleeted.pkl", "rb") as handle:
                 vqts = pickle.load(handle)
 
         else:
-            with open("GTZAN/vqts_original.pkl", "rb") as handle:
+            with open("data/GTZAN/vqts_original.pkl", "rb") as handle:
                 vqts = pickle.load(handle)
 
     _exp = ymldict.get("gtzan_exp")
