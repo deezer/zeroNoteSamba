@@ -28,38 +28,38 @@ train_pkl  : 2880
 
 # SMC Mirex
 smc_exp    : "beat"                       # can be 'beat' or 'perc'
-smc_status : "old-school"                 # can be 'pretrained', 'old-school', or anything else
-smc_pre    : "validation"                 # can be 'frozen', 'finetune', or 'validation'
-smc_eval   : "dbn"                        # can be 'threshold' or 'dbn'
+smc_status : "vanilla"                    # can be 'pretrained', 'old-school', or anything else
+smc_pre    : "finetune"                   # can be 'frozen', 'finetune', or 'validation'
+smc_eval   : "dbn"                        # can be 'threshold', 'librosa', or anything else (dbn)
 smc_lr     : 0.00001                      # learning rate
 
 # Ballroom
-ballroom_exp    : "beat"                  # can be 'beat' or 'perc'
-ballroom_status : "old-school"            # can be 'pretrained', 'old-school', or anything else
-ballroom_pre    : "validation"            # can be 'frozen', 'finetune', or 'validation'
-ballroom_eval   : "dbn"                   # can be 'threshold' or 'dbn'
+ballroom_exp    : "perc"                  # can be 'beat' or 'perc'
+ballroom_status : "vanilla"               # can be 'pretrained', 'old-school', or anything else
+ballroom_pre    : "finetune"              # can be 'frozen', 'finetune', or 'validation'
+ballroom_eval   : "dbn"                   # can be 'threshold', 'librosa', or anything else (dbn)
 ballroom_lr     : 0.00001                 # learning rate
 
 # Hainsworth
-hainsworth_exp    : "beat"                # can be 'beat' or 'perc'
-hainsworth_status : "old-school"          # can be 'pretrained', 'old-school', or anything else
-hainsworth_pre    : "validation"          # can be 'frozen', 'finetune', or 'validation'
-hainsworth_eval   : "dbn"                 # can be 'threshold' or 'dbn'
+hainsworth_exp    : "perc"                # can be 'beat' or 'perc'
+hainsworth_status : "vanilla"             # can be 'pretrained', 'old-school', or anything else
+hainsworth_pre    : "finetune"            # can be 'frozen', 'finetune', or 'validation'
+hainsworth_eval   : "dbn"                 # can be 'threshold', 'librosa', or anything else (dbn)
 hainsworth_lr     : 0.00001               # learning rate
 
 # GTZAN
-gtzan_exp    : "beat"                     # can be 'beat' or 'perc'
-gtzan_status : "old-school"               # can be 'pretrained', 'old-school', or anything else
-gtzan_pre    : "validation"               # can be 'frozen', 'finetune', or 'validation'
-gtzan_eval   : "dbn"                      # can be 'threshold' or 'dbn'
+gtzan_exp    : "perc"                     # can be 'beat' or 'perc'
+gtzan_status : "vanilla"                  # can be 'pretrained', 'old-school', or anything else
+gtzan_pre    : "finetune"                 # can be 'frozen', 'finetune', or 'validation'
+gtzan_eval   : "dbn"                      # can be 'threshold', 'librosa', or anything else (dbn)
 gtzan_lr     : 0.00001                    # learning rate
 
 # Cross data experiment
-cross_status    : "vanilla"             # can be 'pretrained' or anything else
-cross_pre       : "finetune"            # can be 'frozen' or 'finetune'
-cross_train_set : "ballroom"            # can be 'hainsworth', 'ballroom', or 'smc'
-cross_eval      : "dbn"                 # can be 'threshold' or 'dbn'
-cross_lr        : 0.00001               # learning rate
+cross_status    : "vanilla"               # can be 'pretrained' or anything else
+cross_pre       : "finetune"              # can be 'frozen' or 'finetune'
+cross_train_set : "ballroom"              # can be 'hainsworth', 'ballroom', or 'smc'
+cross_eval      : "dbn"                   # can be 'threshold' or 'dbn'
+cross_lr        : 0.00001                 # learning rate
 
 # Measurement experiment
 measave   : True                          # True: GTZAN saved at 44100 Hz

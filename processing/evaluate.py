@@ -1,3 +1,4 @@
+import librosa as audio_lib
 import mir_eval
 import numpy as np
 
@@ -8,14 +9,23 @@ beat_dbn = DBNBeatTrackingProcessor(
 )
 
 
-def beat_tracking(output, reference_beats, threshold=False, thresh_val=0.075, fps=62.5):
+def beat_tracking(output, reference_beats, threshold=False, librosa=False, thresh_val=0.075, fps=62.5):
     """
     Compute F1-score using standard mir_eval function.
-    -- output          : pulse output by model
+    -- output : pulse output by model
     -- reference_beats : array of beat times
+    -- threshold : threshold activation for beat times
+    -- librosa : use Ellis DP for beat times
+    -- thresh_val : threshold value for beat times
+    -- fps : features per second
     """
     reference_beats = np.array(reference_beats)
     reference_beats = mir_eval.beat.trim_beats(reference_beats)
+
+    if threshold == True and librosa == True:
+        raise ValueError(
+            "\nWhich is it...thresholding or librosa?"
+        )
 
     if threshold == True:
         output = np.where(output > thresh_val, 1, 0)
@@ -27,6 +37,10 @@ def beat_tracking(output, reference_beats, threshold=False, thresh_val=0.075, fp
                 estimated_beats.append(x / fps)
 
         estimated_beats = np.asarray(estimated_beats)
+
+    elif librosa == True:
+        _, beats = audio_lib.beat.beat_track(sr=16000, onset_envelope=output, hop_length=256)
+        estimated_beats = audio_lib.frames_to_time(beats, sr=16000, hop_length=256)
 
     else:
         beat_dbn.reset()
