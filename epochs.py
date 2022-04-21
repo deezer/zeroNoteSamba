@@ -3,7 +3,9 @@ import torch
 from processing.evaluate import beat_tracking as eval
 
 
-def train_epoch(model, criterion, optimizer, _status, indices, real_times, vqts, masks, threshold):
+def train_epoch(
+    model, criterion, optimizer, _status, indices, real_times, vqts, masks, threshold
+):
     """
     Training epoch.
     -- model : model to train
@@ -16,7 +18,15 @@ def train_epoch(model, criterion, optimizer, _status, indices, real_times, vqts,
     -- masks : beat activation functions
     -- threshold : threshold value for evaluation
     """
-    full_loss, f_measure, cmlc, cmlt, amlc, amlt, info_gain = 0., 0., 0., 0., 0., 0., 0.
+    full_loss, f_measure, cmlc, cmlt, amlc, amlt, info_gain = (
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+    )
 
     model.train()
 
@@ -46,9 +56,7 @@ def train_epoch(model, criterion, optimizer, _status, indices, real_times, vqts,
 
         else:
             vqt = vqts[wav]
-            vqt = torch.reshape(
-                vqt[:, :], (1, 1, vqt.shape[0], vqt.shape[1])
-            ).cuda()
+            vqt = torch.reshape(vqt[:, :], (1, 1, vqt.shape[0], vqt.shape[1])).cuda()
 
             msk = masks[wav]
             msk = torch.reshape(msk, (1, msk.shape[0])).cuda()
@@ -97,7 +105,15 @@ def val_epoch(model, criterion, _status, indices, real_times, vqts, masks, thres
     -- masks : beat activation functions
     -- threshold : threshold value for evaluation
     """
-    full_loss, f_measure, cmlc, cmlt, amlc, amlt, info_gain = 0., 0., 0., 0., 0., 0., 0.
+    full_loss, f_measure, cmlc, cmlt, amlc, amlt, info_gain = (
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+    )
 
     model.eval()
 

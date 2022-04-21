@@ -93,15 +93,40 @@ def train_model(wavs, vqts, masks, real_times, data_set, ymldict):
             for epoch in range(1):
                 print("\n-- Epoch {} --".format(epoch))
 
-                model, optimizer, full_train_loss, train_f_measure, _, _, _, _, _ = train_epoch(
-                    model, criterion, optimizer, _status, train_indices, real_times, vqts, masks, threshold
+                (
+                    model,
+                    optimizer,
+                    full_train_loss,
+                    train_f_measure,
+                    _,
+                    _,
+                    _,
+                    _,
+                    _,
+                ) = train_epoch(
+                    model,
+                    criterion,
+                    optimizer,
+                    _status,
+                    train_indices,
+                    real_times,
+                    vqts,
+                    masks,
+                    threshold,
                 )
 
                 print("\nMean training loss     is {:.3f}.".format(full_train_loss))
                 print("Mean training F1-score is {:.3f}.".format(train_f_measure))
 
                 full_val_loss, val_f_measure, _, _, _, _, _ = val_epoch(
-                    model, criterion, _status, val_indices, real_times, vqts, masks, threshold
+                    model,
+                    criterion,
+                    _status,
+                    val_indices,
+                    real_times,
+                    vqts,
+                    masks,
+                    threshold,
                 )
 
                 print("\nMean validation loss     is {:.3f}.".format(full_val_loss))
@@ -139,15 +164,22 @@ def train_model(wavs, vqts, masks, real_times, data_set, ymldict):
             test_mod.load_state_dict(state_dict)
 
             (
-                full_test_loss, 
-                test_f_measure, 
-                test_cmlc, 
-                test_cmlt, 
-                test_amlc, 
-                test_amlt, 
+                full_test_loss,
+                test_f_measure,
+                test_cmlc,
+                test_cmlt,
+                test_amlc,
+                test_amlt,
                 test_info_gain,
             ) = val_epoch(
-                test_mod, criterion, _status, test_indices, real_times, vqts, masks, threshold
+                test_mod,
+                criterion,
+                _status,
+                test_indices,
+                real_times,
+                vqts,
+                masks,
+                threshold,
             )
 
             print("\n-- Test Set --")
@@ -177,8 +209,10 @@ def train_model(wavs, vqts, masks, real_times, data_set, ymldict):
             plt.legend(["Train", "Validation"])
             plt.xlabel("Epochs")
             plt.ylabel("Loss")
-            plt.savefig("figures/{}/{}/{}_loss_{}.pdf".format(
-                data_set, _exp, _status, jj), dpi=300, format="pdf"
+            plt.savefig(
+                "figures/{}/{}/{}_loss_{}.pdf".format(data_set, _exp, _status, jj),
+                dpi=300,
+                format="pdf",
             )
 
             plt.figure()
@@ -188,8 +222,10 @@ def train_model(wavs, vqts, masks, real_times, data_set, ymldict):
             plt.ylim([0, 1])
             plt.xlabel("Epochs")
             plt.ylabel("F1-score")
-            plt.savefig("figures/{}/{}/{}_f1_{}.pdf".format(
-                data_set, _exp, _status, jj), dpi=300, format="pdf"
+            plt.savefig(
+                "figures/{}/{}/{}_f1_{}.pdf".format(data_set, _exp, _status, jj),
+                dpi=300,
+                format="pdf",
             )
 
         elif _status == "pretrained" and _pre == "validation":
@@ -197,12 +233,12 @@ def train_model(wavs, vqts, masks, real_times, data_set, ymldict):
 
             (
                 full_test_loss,
-                test_f_measure, 
-                test_cmlc, 
-                test_cmlt, 
-                test_amlc, 
-                test_amlt, 
-                test_info_gain
+                test_f_measure,
+                test_cmlc,
+                test_cmlt,
+                test_amlc,
+                test_amlt,
+                test_info_gain,
             ) = ([], [], [], [], [], [], [])
 
             for _, wav in enumerate(tqdm(wavs)):
@@ -237,26 +273,40 @@ def train_model(wavs, vqts, masks, real_times, data_set, ymldict):
                     test_info_gain.append(res[5])
 
             print("\n-- Full Set --")
-            print("Mean loss     is {:.3f} +- {:.3f}.".format(
-                np.mean(full_test_loss), np.std(full_test_loss))
+            print(
+                "Mean loss     is {:.3f} +- {:.3f}.".format(
+                    np.mean(full_test_loss), np.std(full_test_loss)
+                )
             )
-            print("Mean F1-score is {:.3f} +- {:.3f}.".format(
-                np.mean(test_f_measure), np.std(test_f_measure))
+            print(
+                "Mean F1-score is {:.3f} +- {:.3f}.".format(
+                    np.mean(test_f_measure), np.std(test_f_measure)
+                )
             )
-            print("Mean CMLC     is {:.3f} +- {:.3f}.".format(
-                np.mean(test_cmlc), np.std(test_cmlc))
+            print(
+                "Mean CMLC     is {:.3f} +- {:.3f}.".format(
+                    np.mean(test_cmlc), np.std(test_cmlc)
+                )
             )
-            print("Mean CMLT     is {:.3f} +- {:.3f}.".format(
-                np.mean(test_cmlt), np.std(test_cmlt))
+            print(
+                "Mean CMLT     is {:.3f} +- {:.3f}.".format(
+                    np.mean(test_cmlt), np.std(test_cmlt)
+                )
             )
-            print("Mean AMLC     is {:.3f} +- {:.3f}.".format(
-                np.mean(test_amlc), np.std(test_amlc))
+            print(
+                "Mean AMLC     is {:.3f} +- {:.3f}.".format(
+                    np.mean(test_amlc), np.std(test_amlc)
+                )
             )
-            print("Mean AMLT     is {:.3f} +- {:.3f}.".format(
-                np.mean(test_amlt), np.std(test_amlt))
+            print(
+                "Mean AMLT     is {:.3f} +- {:.3f}.".format(
+                    np.mean(test_amlt), np.std(test_amlt)
+                )
             )
-            print("Mean InfoGain is {:.3f} +- {:.3f}.".format(
-                np.mean(test_info_gain), np.std(test_info_gain))
+            print(
+                "Mean InfoGain is {:.3f} +- {:.3f}.".format(
+                    np.mean(test_info_gain), np.std(test_info_gain)
+                )
             )
 
             break
