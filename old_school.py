@@ -1,27 +1,28 @@
-import mir_eval
 import librosa
+import mir_eval
 import numpy as np
 
 from tqdm import tqdm
 
 
 def dp_ellis(wavs, signals, real_times):
+    """
+    Function for running librosa's algorithm for beat tracking.
+    -- wavs : list of files
+    -- signals : spectrograms of audio
+    -- real_times : list with real times in seconds
+    """
     test_f_measure, test_cmlc, test_cmlt, test_amlc, test_amlt, test_info_gain = (
-        [],
-        [],
-        [],
-        [],
-        [],
-        [],
+        [], [], [], [], [], [],
     )
 
     for wav in tqdm(wavs):
         signal = signals[wav]
         times = real_times[wav]
 
-        _, beats = librosa.beat.beat_track(y=signal, sr=16000, hop_length=512)
+        _, beats = librosa.beat.beat_track(y=signal, sr=16000, hop_length=256)
 
-        estimated_beats = librosa.frames_to_time(beats, sr=16000)
+        estimated_beats = librosa.frames_to_time(beats, sr=16000, hop_length=256)
         estimated_beats = mir_eval.beat.trim_beats(estimated_beats)
 
         reference_beats = np.array(times)
