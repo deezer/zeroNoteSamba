@@ -134,12 +134,9 @@ def train_model(wavs, vqts, masks, real_times, data_set, ymldict):
 
                 if val_f_measure > best_f1:
                     mod_fp = "models/saved/{}_{}_{}.pth".format(data_set, _exp, _status)
-
                     best_f1 = val_f_measure
-
                     torch.save(model.state_dict(), mod_fp)
                     print("Saved model to " + mod_fp)
-
                     val_counter = 0
 
                 else:
