@@ -49,7 +49,7 @@ def train_model(wavs, vqts, beat_pulse, real_beat_times, data_set, ymldict):
         for jj in range(10):
             # Load everything
             criterion, optimizer, model = load_models(_status, _pre, _lr)
-            
+
             val_counter = 0
 
             train_loss = []
@@ -65,13 +65,23 @@ def train_model(wavs, vqts, beat_pulse, real_beat_times, data_set, ymldict):
 
             # Train model
             for _ in trange(500):
-                model, optimizer, full_train_loss, train_f_measure, _, _, _, _, _ = train_epoch(
-                    model, 
-                    criterion, 
-                    optimizer, 
-                    _status, 
-                    train_indices, 
-                    real_beat_times, 
+                (
+                    model,
+                    optimizer,
+                    full_train_loss,
+                    train_f_measure,
+                    _,
+                    _,
+                    _,
+                    _,
+                    _,
+                ) = train_epoch(
+                    model,
+                    criterion,
+                    optimizer,
+                    _status,
+                    train_indices,
+                    real_beat_times,
                     vqts,
                     beat_pulse,
                     False,

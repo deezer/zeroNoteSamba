@@ -13,7 +13,12 @@ def dp_ellis(wavs, signals, real_times):
     -- real_times : list with real times in seconds
     """
     test_f_measure, test_cmlc, test_cmlt, test_amlc, test_amlt, test_info_gain = (
-        [], [], [], [], [], [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
     )
 
     for wav in tqdm(wavs):
