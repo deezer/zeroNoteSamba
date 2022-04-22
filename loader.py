@@ -2,6 +2,7 @@ import torch
 
 from models.models import DS_CNN, Down_CNN
 
+
 def load_models(_status, _pre, _lr):
     """
     Function for loading loss, optimizer, and model.
@@ -17,7 +18,9 @@ def load_models(_status, _pre, _lr):
         print("\nPretrained learning mode...")
 
         model = Down_CNN().cuda()
-        state_dict = torch.load("models/saved/shift_pret_cnn_16.pth", map_location=torch.device("cuda"))
+        state_dict = torch.load(
+            "models/saved/shift_pret_cnn_16.pth", map_location=torch.device("cuda")
+        )
         model.pretext.load_state_dict(state_dict)
 
         if _pre == "frozen":
@@ -34,7 +37,9 @@ def load_models(_status, _pre, _lr):
             )
 
         elif _pre == "finetune":
-            optimizer = torch.optim.Adam(model.parameters(), lr=0.5 * _lr * 10e-2, betas=(0.9, 0.999))
+            optimizer = torch.optim.Adam(
+                model.parameters(), lr=0.5 * _lr * 10e-2, betas=(0.9, 0.999)
+            )
 
     else:
         print("\nVanilla learning mode...")

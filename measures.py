@@ -137,9 +137,9 @@ def shannon_entropy(x):
     -- x : array to be studied
     """
     d = (np.linalg.norm(x, ord=2)) ** 2
-    n = x ** 2
+    n = x**2
     c = n / d
-    S = c * np.log(c ** 2)
+    S = c * np.log(c**2)
 
     return -np.sum(S)
 
