@@ -1,16 +1,91 @@
 import os
 import yaml
+import pickle
+import random
 
+import numpy as np
 import librosa as audio_lib
 import soundfile as sf
 
 from spleeter.separator import Separator
 from pathlib import Path
+from tqdm import tqdm
 
 # File imports
 import processing.utilities as utils
+import processing.input_rep as input_rep
 import processing.stem_check as stem_check
 import processing.source_separation as source_separation
+
+
+def gen_clmr(ymldict):
+    """
+    Generate CLMR examples.
+    -- ymldict   : dictionary with yaml parameters
+    """
+    # Load desired variables
+    fma_dir = ymldict.get("pt_data_dir")
+
+    # Iterate through FMA directory and create csv files with good files
+    dir_list = os.listdir(fma_dir)
+
+    no_explore = ["README.txt", "checksums"]
+
+    pkl_len = 2048
+    pkl_fp = "data/CLMR/clmr_pkl_"
+
+    np_pkl = np.zeros((pkl_len, 2, 96, 313))
+
+    idx = 0
+    pkl_idx = 0
+
+    # Iterate through directories
+    for sel_dir in dir_list:
+        if pkl_idx == 50:
+            break
+
+        if sel_dir in no_explore:
+            continue
+
+        print("Directory: {}".format(sel_dir))
+
+        # Iterate through wav files
+        wav_list = os.listdir(fma_dir + sel_dir + "/")
+
+        for wav in tqdm(wav_list):
+            if pkl_idx == 50:
+                break
+
+            f = fma_dir + sel_dir + "/" + wav
+
+            try:
+                # Create new 16000 Hz file
+                yy = utils.convert_to_xxhz(f, 16000)
+            except:
+                continue
+
+            if len(yy) < 5 * 16000 + 1:
+                continue
+
+            vqt = input_rep.generate_XQT(yy, 16000, "vqt")
+
+            ran_idx1 = random.randint(0, vqt.shape[1] - 313)
+            ran_idx2 = random.randint(0, vqt.shape[1] - 313)
+
+            np_pkl[idx, 0, :, :] = vqt[:, ran_idx1:ran_idx1 + 313]
+            np_pkl[idx, 1, :, :] = vqt[:, ran_idx2:ran_idx2 + 313]
+
+            idx += 1
+
+            if idx == pkl_len:
+                with open(pkl_fp + str(pkl_idx), "wb") as handle:
+                    pickle.dump(np_pkl, handle, pickle.HIGHEST_PROTOCOL)
+                    print("-- Saved file {}. --".format(pkl_fp))
+
+                idx = 0
+                pkl_idx += 1
+
+    return
 
 
 def full_fma_stem_check(separator, ymldict):
@@ -113,10 +188,21 @@ if __name__ == "__main__":
     stream = open("configuration/config.yaml", "r")
     ymldict = yaml.safe_load(stream)
 
-    # Load the separation model:
-    model = ymldict.get("spl_mod")
-    m = "spleeter:{}".format(model)
-    separator = Separator(m)
+    # Load pretext task
+    pt_task = ymldict.get("pt_task")
 
-    # Spleet + stem check a directory
-    full_fma_stem_check(separator, ymldict)
+    if pt_task == "zerons":
+        # Load the separation model:
+        model = ymldict.get("spl_mod")
+        m = "spleeter:{}".format(model)
+        separator = Separator(m)
+
+        # Spleet + stem check a directory
+        full_fma_stem_check(separator, ymldict)
+
+    elif pt_task == "clmr":
+        # Generate CLMR examples
+        gen_clmr(ymldict)
+
+    else:
+        raise ValueError("Which pretext task are we running?")

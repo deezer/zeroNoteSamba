@@ -12,11 +12,14 @@ spl_mod : '4stems'
 input_mode : "vqt"                        # can be vqt or cqt
 
 # Data directory for pre-text and downstream tasks
-pt_data_dir : "/path/to/fma_large/"
+pt_data_dir : "fma_large/"
 
 # Stem check values
 lower_p : .3
 upper_p : 1.
+
+# Pretext task to run
+pt_task: "clmr"                          # can be 'zerons' or 'clmr'
 
 # Training and model parameters
 lr         : 0.000001
@@ -28,34 +31,34 @@ train_pkl  : 2880
 
 # SMC Mirex
 smc_exp    : "beat"                       # can be 'beat' or 'perc'
-smc_status : "vanilla"                    # can be 'pretrained', 'old-school', or anything else
+smc_status : "clmr"                       # can be 'pretrained', 'old-school', 'clmr', or anything else (vanilla)
 smc_pre    : "finetune"                   # can be 'frozen', 'finetune', or 'validation'
 smc_eval   : "dbn"                        # can be 'threshold', 'librosa', or anything else (dbn)
 smc_lr     : 0.00001                      # learning rate
 
 # Ballroom
 ballroom_exp    : "perc"                  # can be 'beat' or 'perc'
-ballroom_status : "vanilla"               # can be 'pretrained', 'old-school', or anything else
+ballroom_status : "vanilla"               # can be 'pretrained', 'old-school', 'clmr', or anything else (vanilla)
 ballroom_pre    : "finetune"              # can be 'frozen', 'finetune', or 'validation'
 ballroom_eval   : "dbn"                   # can be 'threshold', 'librosa', or anything else (dbn)
 ballroom_lr     : 0.00001                 # learning rate
 
 # Hainsworth
 hainsworth_exp    : "perc"                # can be 'beat' or 'perc'
-hainsworth_status : "vanilla"             # can be 'pretrained', 'old-school', or anything else
+hainsworth_status : "vanilla"             # can be 'pretrained', 'old-school', 'clmr', or anything else (vanilla)
 hainsworth_pre    : "finetune"            # can be 'frozen', 'finetune', or 'validation'
 hainsworth_eval   : "dbn"                 # can be 'threshold', 'librosa', or anything else (dbn)
 hainsworth_lr     : 0.00001               # learning rate
 
 # GTZAN
 gtzan_exp    : "perc"                     # can be 'beat' or 'perc'
-gtzan_status : "vanilla"                  # can be 'pretrained', 'old-school', or anything else
+gtzan_status : "vanilla"                  # can be 'pretrained', 'old-school', 'clmr', or anything else (vanilla)
 gtzan_pre    : "finetune"                 # can be 'frozen', 'finetune', or 'validation'
 gtzan_eval   : "dbn"                      # can be 'threshold', 'librosa', or anything else (dbn)
 gtzan_lr     : 0.00001                    # learning rate
 
 # Cross data experiment
-cross_status    : "vanilla"               # can be 'pretrained' or anything else
+cross_status    : "vanilla"               # can be 'pretrained', 'clmr', or anything else (vanilla)
 cross_pre       : "finetune"              # can be 'frozen' or 'finetune'
 cross_train_set : "ballroom"              # can be 'hainsworth', 'ballroom', or 'smc'
 cross_eval      : "dbn"                   # can be 'threshold' or 'dbn'
