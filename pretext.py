@@ -1,6 +1,5 @@
 import os
 import yaml
-import random
 import torch
 import random
 import shutil
@@ -18,8 +17,9 @@ from torch.utils.data import TensorDataset, DataLoader
 import processing.stem_check as stem_check
 import processing.input_rep as input_rep
 
-from models.models import Pretext_CNN
+from models.models import Pretext_CNN, DS_CNN
 from models.loss_functions import NTXent
+from fma_loader import gen_clmr
 
 device0 = torch.device("cuda:0")
 device1 = torch.device("cuda:1")
@@ -178,17 +178,23 @@ def train_model(ymldict, saved=True):
     epochs = ymldict.get("num_epochs")
     lr = ymldict.get("lr")
     tmp = ymldict.get("temp")
+    pt_task = ymldict.get("pt_task")
 
-    fps = os.listdir("new_data/")
+    fps = os.listdir("ddesblancs/new_data/")
     random.shuffle(fps)
 
     # Model, optimizer, criterion...
-    criterion = NTXent(batch_len=batch_len, temperature=tmp).to(device1)
-
-    model = Pretext_CNN(pretext=True)
-    model.anchor.to(device0)
-    model.postve.to(device1)
-    model_name = "shift_pret_cnn_{}.pth".format(batch_len)
+    if pt_task == "zerons":
+        criterion = NTXent(batch_len=batch_len, temperature=tmp).to(device1)
+        model = Pretext_CNN()
+        model.anchor.to(device0)
+        model.postve.to(device1)
+        model_name = "shift_pret_cnn_{}.pth".format(batch_len)
+    else:
+        criterion = NTXent(batch_len=batch_len, temperature=tmp).to(device0)
+        model = DS_CNN()
+        model.to(device0)
+        model_name = "clmr_pret_cnn_{}.pth".format(batch_len)
 
     optimizer = torch.optim.Adam(params=model.parameters(), lr=lr)
     scheduler = torch.optim.lr_scheduler.StepLR(
@@ -207,7 +213,7 @@ def train_model(ymldict, saved=True):
     # Train model
     for epoch in range(epochs):
 
-        print("\n--- Epoch {} ---".format(epoch))
+        print("\n--- Epoch {} ---\n".format(epoch))
 
         # Create data loader
         if epoch == 0:
@@ -216,51 +222,83 @@ def train_model(ymldict, saved=True):
             if saved == False:
                 print("Saving pkl files!")
 
-                _, _, fps = create_memory_bank(
-                    val_len, ymldict, fps, "data/Validation/val_bank.pkl"
-                )
-
-                for xx in trange(10):
+                if pt_task == 'zerons':
                     _, _, fps = create_memory_bank(
-                        train_pkl,
-                        ymldict,
-                        fps,
-                        "data/Train/train_bank_{}.pkl".format(xx),
+                        val_len, ymldict, fps, "data/Validation/val_bank.pkl"
                     )
 
-                print("Number of files remaining is {}.".format(len(fps)))
+                    for xx in trange(10):
+                        _, _, fps = create_memory_bank(
+                            train_pkl,
+                            ymldict,
+                            fps,
+                            "data/Train/train_bank_{}.pkl".format(xx),
+                        )
+
+                    print("Number of files remaining is {}.".format(len(fps)))
+
+                elif pt_task == 'clmr':
+                    gen_clmr(ymldict)
+
+                else:
+                    raise ValueError("Which pretext task are we running?")
+
                 quit()
 
             else:
                 print("Loading pkl files...")
 
-                train_bank = np.zeros((28800, 2, 96, 626), dtype=np.float32)
-                val_bank = np.zeros((6400, 2, 96, 626), dtype=np.float32)
+                if pt_task == 'zerons':
+                    train_bank = np.zeros((28800, 2, 96, 626), dtype=np.float32)
+                    val_bank = np.zeros((6400, 2, 96, 626), dtype=np.float32)
 
-                for xx in trange(10):
-                    with open(
-                        "data/Train/train_bank_{}.pkl".format(xx), "rb"
-                    ) as handle:
-                        train_bank[xx * 2880 : xx * 2880 + 2880, :, :, :] = pickle.load(
-                            handle
-                        )[:, :, :, :]
+                    for xx in trange(10):
+                        with open(
+                            "data/Train/train_bank_{}.pkl".format(xx), "rb"
+                        ) as handle:
+                            train_bank[xx * 2880 : xx * 2880 + 2880, :, :, :] = pickle.load(
+                                handle
+                            )[:, :, :, :]
 
-                with open("data/Validation/val_bank.pkl", "rb") as handle:
-                    val_bank[:, :, :, :] = pickle.load(handle)[:, :, :, :]
+                    with open("data/Validation/val_bank.pkl", "rb") as handle:
+                        val_bank[:, :, :, :] = pickle.load(handle)[:, :, :, :]
 
-        np.random.shuffle(train_bank)
+                elif pt_task == 'clmr':
+                    bank = np.zeros((102400, 2, 96, 313), dtype=np.float32)
 
-        if epoch == 0:
-            new_val_bank = np.zeros((6400 * batch_len, 2, 96, 313), dtype=np.float32)
+                    for xx in trange(50):
+                        with open("data/CLMR/clmr_pkl_{}".format(xx), "rb") as handle:
+                            bank[xx * 2048:xx * 2048 + 2048, :, :, :] = pickle.load(handle)[:, :, :, :]
 
-            print("Creating new validation shifts...")
-            for xx in trange(6400):
-                randomlist = random.sample(range(0, 313), batch_len)
+                    print("Creating datasets...")
+                    np.random.shuffle(bank)
 
-                for ii, start_idx in enumerate(randomlist):
-                    new_val_bank[xx * batch_len + ii, :, :, :] = val_bank[
-                        xx, :, :, start_idx : start_idx + 313
-                    ]
+                    train_bank = bank[0:81920, :, :, :]
+                    val_bank = bank[20480:, :, :, :]
+
+                else:
+                    raise ValueError("Which pretext task are we running?")
+
+        if pt_task == 'zerons':
+            np.random.shuffle(train_bank)
+
+            if epoch == 0:
+                new_val_bank = np.zeros((6400 * batch_len, 2, 96, 313), dtype=np.float32)
+
+                print("Creating new validation shifts...")
+                for xx in trange(6400):
+                    randomlist = random.sample(range(0, 313), batch_len)
+
+                    for ii, start_idx in enumerate(randomlist):
+                        new_val_bank[xx * batch_len + ii, :, :, :] = val_bank[
+                            xx, :, :, start_idx : start_idx + 313
+                        ]
+
+        elif pt_task == 'clmr':
+            np.random.shuffle(train_bank)
+
+        else: 
+            raise ValueError("Which pretext task are we running?")
 
         full_train_loss = 0.0
         full_train_anpos = 0.0
@@ -269,30 +307,49 @@ def train_model(ymldict, saved=True):
         full_val_anpos = 0.0
         full_val_anneg = 0.0
 
-        for jj in range(20):
-            new_train_bank = np.zeros((1440 * batch_len, 2, 96, 313), dtype=np.float32)
+        if pt_task == 'zerons':
+            for jj in range(20):
+                new_train_bank = np.zeros((1440 * batch_len, 2, 96, 313), dtype=np.float32)
 
-            print("\n{} : Creating new training shifts...".format(jj))
-            for xx in trange(1440):
-                randomlist = random.sample(range(0, 313), batch_len)
+                print("{} : Creating new training shifts...".format(jj))
+                for xx in trange(1440):
+                    randomlist = random.sample(range(0, 313), batch_len)
 
-                for ii, start_idx in enumerate(randomlist):
-                    new_train_bank[xx * batch_len + ii, :, :, :] = train_bank[
-                        jj * 1440 + xx, :, :, start_idx : start_idx + 313
-                    ]
+                    for ii, start_idx in enumerate(randomlist):
+                        new_train_bank[xx * batch_len + ii, :, :, :] = train_bank[
+                            jj * 1440 + xx, :, :, start_idx : start_idx + 313
+                        ]
 
-            train_ds = TensorDataset(torch.tensor(new_train_bank).float())
-            train_loader = DataLoader(train_ds, batch_size=batch_len, shuffle=False)
+                train_ds = TensorDataset(torch.tensor(new_train_bank).float())
+                train_loader = DataLoader(train_ds, batch_size=batch_len, shuffle=False)
 
-            # Train epoch
-            print("{} : Training...".format(jj))
-            model, temp_train_loss, temp_train_anpos, temp_train_anneg = train_epoch(
-                model, train_loader, criterion, optimizer
-            )
+                # Train epoch
+                print("{} : Training...".format(jj))
+                model, temp_train_loss, temp_train_anpos, temp_train_anneg = train_epoch(
+                    model, train_loader, criterion, optimizer
+                )
 
-            full_train_loss += temp_train_loss
-            full_train_anpos += temp_train_anpos
-            full_train_anneg += temp_train_anneg
+                full_train_loss += temp_train_loss
+                full_train_anpos += temp_train_anpos
+                full_train_anneg += temp_train_anneg
+
+        elif pt_task == 'clmr':
+            for zz in range(20):
+                train_ds = TensorDataset(torch.tensor(train_bank[zz * 4096: zz * 4096 + 4096, :, :, :]).float())
+                train_loader = DataLoader(train_ds, batch_size=batch_len, shuffle=True)
+
+                # Train epoch
+                print("{} : Training...".format(zz))
+                model, temp_train_loss, temp_train_anpos, temp_train_anneg = train_epoch(
+                    model, train_loader, criterion, optimizer, pt_task='clmr'
+                )
+
+                full_train_loss += temp_train_loss
+                full_train_anpos += temp_train_anpos
+                full_train_anneg += temp_train_anneg
+
+        else:
+            raise ValueError("Which pretext task are we running?")
 
         full_train_loss /= 20
         full_train_anpos /= 20
@@ -316,23 +373,40 @@ def train_model(ymldict, saved=True):
 
         print("\n{} : Validating...".format(epoch))
 
-        for zz in trange(10):
-            val_ds = TensorDataset(
-                torch.tensor(
-                    new_val_bank[
-                        640 * batch_len * zz : 640 * batch_len * (zz + 1), :, :, :
-                    ]
-                ).float()
-            )
-            val_loader = DataLoader(val_ds, batch_size=batch_len, shuffle=False)
+        if pt_task == 'zerons':
+            for zz in trange(10):
+                val_ds = TensorDataset(
+                    torch.tensor(
+                        new_val_bank[
+                            640 * batch_len * zz : 640 * batch_len * (zz + 1), :, :, :
+                        ]
+                    ).float()
+                )
+                val_loader = DataLoader(val_ds, batch_size=batch_len, shuffle=False)
 
-            temp_val_loss, temp_val_anpos, temp_val_anneg = val_epoch(
-                model, val_loader, criterion, optimizer
-            )
+                temp_val_loss, temp_val_anpos, temp_val_anneg = val_epoch(
+                    model, val_loader, criterion, optimizer
+                )
 
-            full_val_loss += temp_val_loss
-            full_val_anpos += temp_val_anpos
-            full_val_anneg += temp_val_anneg
+                full_val_loss += temp_val_loss
+                full_val_anpos += temp_val_anpos
+                full_val_anneg += temp_val_anneg
+
+        elif pt_task == 'clmr':
+            for hh in trange(10):
+                val_ds = TensorDataset(torch.tensor(val_bank[hh * 2048: hh * 2048 + 2048, :, :, :]).float())
+                val_loader = DataLoader(val_ds, batch_size=batch_len, shuffle=False)
+
+                temp_val_loss, temp_val_anpos, temp_val_anneg = val_epoch(
+                    model, val_loader, criterion, optimizer, pt_task='clmr'
+                )
+
+                full_val_loss += temp_val_loss
+                full_val_anpos += temp_val_anpos
+                full_val_anneg += temp_val_anneg
+        
+        else:
+            raise ValueError("Which pretext task are we running?")
 
         full_val_loss /= 10
         full_val_anpos /= 10
@@ -397,13 +471,14 @@ def train_model(ymldict, saved=True):
     return model
 
 
-def train_epoch(model, train_loader, criterion, optimizer):
+def train_epoch(model, train_loader, criterion, optimizer, pt_task='zerons'):
     """
     Function for CL model training.
     -- model        : model to train
     -- train_loader : loader with batches that contain 1 anchor, 1 positive, and negatives
     -- criterion    : loss function
     -- optimizer    : optimizer defined
+    -- pt_task      : pretext task to run
     """
     full_train_loss = 0.0
     full_train_anpos = 0.0
@@ -411,24 +486,47 @@ def train_epoch(model, train_loader, criterion, optimizer):
 
     model.train()
 
-    for batch_idx, [batch] in enumerate(tqdm(train_loader)):
-        anchors = batch[:, 0:1, :, :].to(device0)
-        postves = batch[:, 1:2, :, :].to(device1)
+    if pt_task == 'zerons':
+        for batch_idx, [batch] in enumerate(tqdm(train_loader)):
+            anchors = batch[:, 0:1, :, :].to(device0)
+            postves = batch[:, 1:2, :, :].to(device1)
 
-        optimizer.zero_grad()
+            optimizer.zero_grad()
 
-        # Apply model to full batch
-        anc_emb, pos_emb = model(anchors, postves)
+            # Apply model to full batch
+            anc_emb, pos_emb = model(anchors, postves)
 
-        anc_emb = anc_emb.to(device1)
+            anc_emb = anc_emb.to(device1)
 
-        loss, sim_an_pos, sim_an_neg = criterion(anc_emb, pos_emb)
-        loss.backward()
-        optimizer.step()
+            loss, sim_an_pos, sim_an_neg = criterion(anc_emb, pos_emb)
+            loss.backward()
+            optimizer.step()
 
-        full_train_loss += loss.item()
-        full_train_anpos += sim_an_pos
-        full_train_anneg += sim_an_neg
+            full_train_loss += loss.item()
+            full_train_anpos += sim_an_pos
+            full_train_anneg += sim_an_neg
+
+    elif pt_task == 'clmr':
+        for batch_idx, [batch] in enumerate(tqdm(train_loader)):
+            anchors = batch[:, 0:1, :, :].to(device0)
+            postves = batch[:, 1:2, :, :].to(device0)
+
+            optimizer.zero_grad()
+
+            # Apply model to full batch
+            anc_emb = model(anchors)
+            pos_emb = model(postves)
+
+            loss, sim_an_pos, sim_an_neg = criterion(anc_emb, pos_emb)
+            loss.backward()
+            optimizer.step()
+
+            full_train_loss += loss.item()
+            full_train_anpos += sim_an_pos
+            full_train_anneg += sim_an_neg
+
+    else:
+        raise ValueError("Which pretext task are we running?")
 
     full_train_loss = full_train_loss / (batch_idx + 1)
     full_train_anpos = full_train_anpos / (batch_idx + 1)
@@ -449,13 +547,14 @@ def train_epoch(model, train_loader, criterion, optimizer):
     return model, full_train_loss, full_train_anpos, full_train_anneg
 
 
-def val_epoch(model, val_loader, criterion, optimizer):
+def val_epoch(model, val_loader, criterion, optimizer, pt_task='zerons'):
     """
     Function for CL model training.
     -- model        : model to train
     -- val_loader   : loader with batches that contain 1 anchor, 1 positive, and negatives
     -- criterion    : loss function
     -- optimizer    : optimizer defined
+    -- pt_task      : pretext task to run
     """
     full_val_loss = 0.0
     full_val_anpos = 0.0
@@ -463,23 +562,45 @@ def val_epoch(model, val_loader, criterion, optimizer):
 
     model.eval()
 
-    for batch_idx, [batch] in enumerate(val_loader):
-        with torch.no_grad():
-            anchors = batch[:, 0:1, :, :].to(device0)
-            postves = batch[:, 1:2, :, :].to(device1)
+    if pt_task == 'zerons':
+        for batch_idx, [batch] in enumerate(val_loader):
+            with torch.no_grad():
+                anchors = batch[:, 0:1, :, :].to(device0)
+                postves = batch[:, 1:2, :, :].to(device1)
 
-            optimizer.zero_grad()
+                optimizer.zero_grad()
 
-            # Apply model to full batch
-            anc_emb, pos_emb = model(anchors, postves)
+                # Apply model to full batch
+                anc_emb, pos_emb = model(anchors, postves)
 
-            anc_emb = anc_emb.to(device1)
+                anc_emb = anc_emb.to(device1)
 
-            loss, sim_an_pos, sim_an_neg = criterion(anc_emb, pos_emb)
+                loss, sim_an_pos, sim_an_neg = criterion(anc_emb, pos_emb)
 
-            full_val_loss += loss.item()
-            full_val_anpos += sim_an_pos
-            full_val_anneg += sim_an_neg
+                full_val_loss += loss.item()
+                full_val_anpos += sim_an_pos
+                full_val_anneg += sim_an_neg
+
+    elif pt_task == 'clmr':
+        for batch_idx, [batch] in enumerate(val_loader):
+            with torch.no_grad():
+                anchors = batch[:, 0:1, :, :].to(device0)
+                postves = batch[:, 1:2, :, :].to(device0)
+
+                optimizer.zero_grad()
+
+                # Apply model to full batch
+                anc_emb = model(anchors)
+                pos_emb = model(postves)
+
+                loss, sim_an_pos, sim_an_neg = criterion(anc_emb, pos_emb)
+
+                full_val_loss += loss.item()
+                full_val_anpos += sim_an_pos
+                full_val_anneg += sim_an_neg
+
+    else:
+        raise ValueError("Which pretext task are we running?")
 
     full_val_loss = full_val_loss / (batch_idx + 1)
     full_val_anpos = full_val_anpos / (batch_idx + 1)

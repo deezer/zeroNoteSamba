@@ -21,7 +21,7 @@ import processing.source_separation as source_separation
 def gen_clmr(ymldict):
     """
     Generate CLMR examples.
-    -- ymldict   : dictionary with yaml parameters
+    -- ymldict : dictionary with yaml parameters
     """
     # Load desired variables
     fma_dir = ymldict.get("pt_data_dir")
