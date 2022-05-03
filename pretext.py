@@ -426,8 +426,8 @@ def train_model(ymldict, saved=True):
 
         # Save model
         if full_val_loss < best_val_loss:
-            torch.save(model.state_dict(), "models/" + model_name)
-            print("...Saved model to " + "models/" + model_name)
+            torch.save(model.state_dict(), "models/saved/" + model_name)
+            print("...Saved model to " + "models/saved/" + model_name)
             best_val_loss = full_val_loss
 
         val_losses.append(full_val_loss)
