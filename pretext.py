@@ -176,7 +176,6 @@ def train_model(ymldict, saved=True):
     train_pkl = ymldict.get("train_pkl")
     batch_len = ymldict.get("batch_size")
     epochs = ymldict.get("num_epochs")
-    lr = ymldict.get("lr")
     tmp = ymldict.get("temp")
     pt_task = ymldict.get("pt_task")
 
@@ -190,16 +189,13 @@ def train_model(ymldict, saved=True):
         model.anchor.to(device0)
         model.postve.to(device1)
         model_name = "shift_pret_cnn_{}.pth".format(batch_len)
+        optimizer = torch.optim.Adam(params=model.parameters(), lr=0.000001)
     else:
         criterion = NTXent(batch_len=batch_len, temperature=tmp).to(device0)
         model = DS_CNN()
         model.to(device0)
         model_name = "clmr_pret_cnn_{}.pth".format(batch_len)
-
-    optimizer = torch.optim.Adam(params=model.parameters(), lr=lr)
-    scheduler = torch.optim.lr_scheduler.StepLR(
-        optimizer, step_size=500, gamma=0.75, verbose=False
-    )
+        optimizer = torch.optim.Adam(params=model.parameters(), lr=0.00001)
 
     train_losses = []
     train_an_pos = []
@@ -433,8 +429,6 @@ def train_model(ymldict, saved=True):
         val_losses.append(full_val_loss)
         val_an_pos.append(full_val_anpos)
         val_an_neg.append(full_val_anneg)
-
-        scheduler.step()
 
         if int(epoch + 1) % 5 == 0:
             os.makedirs("figures", exist_ok=True)
