@@ -31,29 +31,29 @@ train_pkl  : 2880
 
 # SMC Mirex
 smc_exp    : "beat"                       # can be 'beat' or 'perc'
-smc_status : "clmr"                       # can be 'pretrained', 'old-school', 'clmr', or anything else (vanilla)
-smc_pre    : "finetune"                   # can be 'frozen', 'validation', or anything else (finetune)
+smc_status : "clmr"                       # can be 'pretrained', 'old-school', 'clmr', or 'vanilla'
+smc_pre    : "validation"                 # can be 'frozen', 'validation', or 'finetune'
 smc_eval   : "dbn"                        # can be 'threshold', 'librosa', or anything else (dbn)
 smc_lr     : 0.00001                      # learning rate
 
 # Ballroom
-ballroom_exp    : "perc"                  # can be 'beat' or 'perc'
-ballroom_status : "vanilla"               # can be 'pretrained', 'old-school', 'clmr', or anything else (vanilla)
-ballroom_pre    : "finetune"              # can be 'frozen', 'validation', or anything else (finetune)
+ballroom_exp    : "beat"                  # can be 'beat' or 'perc'
+ballroom_status : "clmr"                  # can be 'pretrained', 'old-school', 'clmr', or 'vanilla'
+ballroom_pre    : "validation"            # can be 'frozen', 'validation', or 'finetune'
 ballroom_eval   : "dbn"                   # can be 'threshold', 'librosa', or anything else (dbn)
 ballroom_lr     : 0.00001                 # learning rate
 
 # Hainsworth
-hainsworth_exp    : "perc"                # can be 'beat' or 'perc'
-hainsworth_status : "vanilla"             # can be 'pretrained', 'old-school', 'clmr', or anything else (vanilla)
-hainsworth_pre    : "finetune"            # can be 'frozen', 'validation', or anything else (finetune)
+hainsworth_exp    : "beat"                # can be 'beat' or 'perc'
+hainsworth_status : "clmr"                # can be 'pretrained', 'old-school', 'clmr', or 'vanilla'
+hainsworth_pre    : "validation"          # can be 'frozen', 'validation', or 'finetune'
 hainsworth_eval   : "dbn"                 # can be 'threshold', 'librosa', or anything else (dbn)
 hainsworth_lr     : 0.00001               # learning rate
 
 # GTZAN
-gtzan_exp    : "perc"                     # can be 'beat' or 'perc'
-gtzan_status : "vanilla"                  # can be 'pretrained', 'old-school', 'clmr', or anything else (vanilla)
-gtzan_pre    : "finetune"                 # can be 'frozen', 'validation', or anything else (finetune)
+gtzan_exp    : "beat"                     # can be 'beat' or 'perc'
+gtzan_status : "clmr"                     # can be 'pretrained', 'old-school', 'clmr', or 'vanilla'
+gtzan_pre    : "validation"               # can be 'frozen', 'validation', or 'finetune'
 gtzan_eval   : "dbn"                      # can be 'threshold', 'librosa', or anything else (dbn)
 gtzan_lr     : 0.00001                    # learning rate
 

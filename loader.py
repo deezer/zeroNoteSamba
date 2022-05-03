@@ -64,7 +64,7 @@ def load_models(_status, _pre, _lr):
 
         else:
             optimizer = torch.optim.Adam(
-                model.parameters(), lr=0.5 * _lr * 10e-2, betas=(0.9, 0.999)
+                model.parameters(), lr=_lr, betas=(0.9, 0.999)
             )
 
     else:
