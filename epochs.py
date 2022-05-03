@@ -4,7 +4,7 @@ from processing.evaluate import beat_tracking as eval
 
 
 def train_epoch(
-    model, criterion, optimizer, _status, indices, real_times, vqts, masks, threshold
+    model, criterion, optimizer, _status, indices, real_times, inputs, masks, threshold
 ):
     """
     Training epoch.
@@ -14,7 +14,7 @@ def train_epoch(
     -- _status : pretrained model?
     -- indices : set indices
     -- real_times : real beat times
-    -- vqts : variable q-transforms
+    -- inputs : spectrograms of audio to feed to NN
     -- masks : beat activation functions
     -- threshold : threshold value for evaluation
     """
@@ -34,7 +34,7 @@ def train_epoch(
         times = real_times[wav]
 
         if _status == "pretrained":
-            vqt = vqts[wav]
+            vqt = inputs[wav]
             vqt1 = torch.reshape(
                 vqt[0, :, :], (1, 1, vqt.shape[1], vqt.shape[2])
             ).cuda()
@@ -55,7 +55,7 @@ def train_epoch(
             optimizer.step()
 
         else:
-            vqt = vqts[wav]
+            vqt = inputs[wav]
             vqt = torch.reshape(vqt[:, :], (1, 1, vqt.shape[0], vqt.shape[1])).cuda()
 
             msk = masks[wav]
@@ -93,7 +93,7 @@ def train_epoch(
     return model, optimizer, full_loss, f_measure, cmlc, cmlt, amlc, amlt, info_gain
 
 
-def val_epoch(model, criterion, _status, indices, real_times, vqts, masks, threshold):
+def val_epoch(model, criterion, _status, indices, real_times, inputs, masks, threshold):
     """
     Validation epoch.
     -- model : model to train
@@ -101,7 +101,7 @@ def val_epoch(model, criterion, _status, indices, real_times, vqts, masks, thres
     -- _status : pretrained model?
     -- indices : set indices
     -- real_times : real beat times
-    -- vqts : variable q-transforms
+    -- inputs : signals or spectrograms of audio to feed to NN
     -- masks : beat activation functions
     -- threshold : threshold value for evaluation
     """
@@ -122,7 +122,7 @@ def val_epoch(model, criterion, _status, indices, real_times, vqts, masks, thres
             times = real_times[wav]
 
             if _status == "pretrained":
-                vqt = vqts[wav]
+                vqt = inputs[wav]
                 vqt1 = torch.reshape(
                     vqt[0, :, :], (1, 1, vqt.shape[1], vqt.shape[2])
                 ).cuda()
@@ -138,7 +138,7 @@ def val_epoch(model, criterion, _status, indices, real_times, vqts, masks, thres
                 loss = criterion(output, msk)
 
             else:
-                vqt = vqts[wav]
+                vqt = inputs[wav]
                 vqt = torch.reshape(
                     vqt[:, :], (1, 1, vqt.shape[0], vqt.shape[1])
                 ).cuda()

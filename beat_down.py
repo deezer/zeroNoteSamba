@@ -11,11 +11,11 @@ from models.models import DS_CNN, Down_CNN
 from processing.evaluate import beat_tracking as eval
 
 
-def train_model(wavs, vqts, masks, real_times, data_set, ymldict):
+def train_model(wavs, inputs, masks, real_times, data_set, ymldict):
     """
     Function for training model on Ballroom data set.
     -- wavs : list of files
-    -- vqts : spectrograms of audio
+    -- inputs : spectrograms of audio to feed to NN
     -- masks : pulse vectors
     -- real_times : list with real times in seconds
     -- data_set : data set we are running our experiment on
@@ -64,9 +64,8 @@ def train_model(wavs, vqts, masks, real_times, data_set, ymldict):
         criterion, optimizer, model = load_models(_status, _pre, _lr)
 
         if (
-            (_status == "pretrained" and _pre == "finetune")
-            or (_status == "pretrained" and _pre == "frozen")
-            or (_status != "pretrained")
+            ((_status == "clmr" or _status == "pretrained") and (_pre == "finetune" or _pre == "frozen"))
+            or (_status == "vanilla")
         ):
             val_counter = 0
 
@@ -90,7 +89,7 @@ def train_model(wavs, vqts, masks, real_times, data_set, ymldict):
             best_f1 = 0.0
 
             # Train model
-            for epoch in range(500):
+            for epoch in range(1):
                 print("\n-- Epoch {} --".format(epoch))
 
                 (
@@ -110,7 +109,7 @@ def train_model(wavs, vqts, masks, real_times, data_set, ymldict):
                     _status,
                     train_indices,
                     real_times,
-                    vqts,
+                    inputs,
                     masks,
                     threshold,
                 )
@@ -124,7 +123,7 @@ def train_model(wavs, vqts, masks, real_times, data_set, ymldict):
                     _status,
                     val_indices,
                     real_times,
-                    vqts,
+                    inputs,
                     masks,
                     threshold,
                 )
@@ -174,7 +173,7 @@ def train_model(wavs, vqts, masks, real_times, data_set, ymldict):
                 _status,
                 test_indices,
                 real_times,
-                vqts,
+                inputs,
                 masks,
                 threshold,
             )
@@ -225,7 +224,7 @@ def train_model(wavs, vqts, masks, real_times, data_set, ymldict):
                 format="pdf",
             )
 
-        elif _status == "pretrained" and _pre == "validation":
+        elif (_status == "pretrained" or _status == "clmr") and _pre == "validation":
             model.eval()
 
             (
@@ -242,20 +241,35 @@ def train_model(wavs, vqts, masks, real_times, data_set, ymldict):
                 with torch.no_grad():
                     times = real_times[wav]
 
-                    vqt = vqts[wav]
-                    vqt1 = torch.reshape(
-                        vqt[0, :, :], (1, 1, vqt.shape[1], vqt.shape[2])
-                    ).cuda()
-                    vqt2 = torch.reshape(
-                        vqt[1, :, :], (1, 1, vqt.shape[1], vqt.shape[2])
-                    ).cuda()
+                    if _status == "pretrained":
+                        vqt = inputs[wav]
+                        vqt1 = torch.reshape(
+                            vqt[0, :, :], (1, 1, vqt.shape[1], vqt.shape[2])
+                        ).cuda()
+                        vqt2 = torch.reshape(
+                            vqt[1, :, :], (1, 1, vqt.shape[1], vqt.shape[2])
+                        ).cuda()
 
-                    msk = masks[wav]
-                    msk = torch.reshape(msk, (1, msk.shape[0])).cuda()
+                        msk = masks[wav]
+                        msk = torch.reshape(msk, (1, msk.shape[0])).cuda()
 
-                    output = model(vqt1, vqt2)
+                        output = model(vqt1, vqt2)
 
-                    loss = criterion(output, msk)
+                        loss = criterion(output, msk)
+
+                    else:
+                        vqt = inputs[wav]
+                        vqt = torch.reshape(
+                            vqt[:, :], (1, 1, vqt.shape[0], vqt.shape[1])
+                        ).cuda()
+
+                        msk = masks[wav]
+                        msk = torch.reshape(msk, (1, msk.shape[0])).cuda()
+
+                        # Apply model to full batch
+                        output = model(vqt)
+
+                        loss = criterion(output, msk)
 
                     full_test_loss.append(loss.item())
 
