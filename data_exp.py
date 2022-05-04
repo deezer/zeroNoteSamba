@@ -94,7 +94,7 @@ def train_model(wavs, vqts, beat_pulse, real_beat_times, data_set, ymldict):
                     vqts,
                     beat_pulse,
                     threshold,
-                    librosa
+                    librosa,
                 )
 
                 full_val_loss, val_f_measure, _, _, _, _, _ = val_epoch(
@@ -106,7 +106,7 @@ def train_model(wavs, vqts, beat_pulse, real_beat_times, data_set, ymldict):
                     vqts,
                     beat_pulse,
                     threshold,
-                    librosa
+                    librosa,
                 )
 
                 if val_f_measure > best_f1:
@@ -155,7 +155,7 @@ def train_model(wavs, vqts, beat_pulse, real_beat_times, data_set, ymldict):
                 vqts,
                 beat_pulse,
                 threshold,
-                librosa
+                librosa,
             )
 
             print("\n-- Test Set {} --".format(jj))

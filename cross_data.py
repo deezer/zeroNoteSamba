@@ -73,7 +73,7 @@ def train_model(
     for jj in range(8):
         # Load everything
         criterion, optimizer, model = load_models(_status, _pre, _lr)
-        
+
         val_counter = 0
 
         train_loss = []
@@ -116,7 +116,7 @@ def train_model(
                 train_vqts,
                 train_masks,
                 threshold,
-                librosa
+                librosa,
             )
 
             print("\nMean training loss is {:.3f}.".format(full_train_loss))
@@ -131,7 +131,7 @@ def train_model(
                 train_vqts,
                 train_masks,
                 threshold,
-                librosa
+                librosa,
             )
 
             print("\nMean validation loss     is {:.3f}.".format(full_val_loss))
@@ -182,9 +182,9 @@ def train_model(
             test_vqts,
             test_masks,
             threshold,
-            librosa
+            librosa,
         )
-        
+
         print("\n-- Test Set --")
         print("\nMean test loss     is {:.3f}.".format(full_test_loss))
         print("Mean beat F1-score is {:.3f}.".format(test_f_measure))

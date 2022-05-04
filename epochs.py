@@ -4,7 +4,16 @@ from processing.evaluate import beat_tracking as eval
 
 
 def train_epoch(
-    model, criterion, optimizer, _status, indices, real_times, inputs, masks, threshold, librosa
+    model,
+    criterion,
+    optimizer,
+    _status,
+    indices,
+    real_times,
+    inputs,
+    masks,
+    threshold,
+    librosa,
 ):
     """
     Training epoch.
@@ -94,7 +103,9 @@ def train_epoch(
     return model, optimizer, full_loss, f_measure, cmlc, cmlt, amlc, amlt, info_gain
 
 
-def val_epoch(model, criterion, _status, indices, real_times, inputs, masks, threshold, librosa):
+def val_epoch(
+    model, criterion, _status, indices, real_times, inputs, masks, threshold, librosa
+):
     """
     Validation epoch.
     -- model : model to train

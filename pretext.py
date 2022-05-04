@@ -218,7 +218,7 @@ def train_model(ymldict, saved=True):
             if saved == False:
                 print("Saving pkl files!")
 
-                if pt_task == 'zerons':
+                if pt_task == "zerons":
                     _, _, fps = create_memory_bank(
                         val_len, ymldict, fps, "data/Validation/val_bank.pkl"
                     )
@@ -233,7 +233,7 @@ def train_model(ymldict, saved=True):
 
                     print("Number of files remaining is {}.".format(len(fps)))
 
-                elif pt_task == 'clmr':
+                elif pt_task == "clmr":
                     gen_clmr(ymldict)
 
                 else:
@@ -244,7 +244,7 @@ def train_model(ymldict, saved=True):
             else:
                 print("Loading pkl files...")
 
-                if pt_task == 'zerons':
+                if pt_task == "zerons":
                     train_bank = np.zeros((28800, 2, 96, 626), dtype=np.float32)
                     val_bank = np.zeros((6400, 2, 96, 626), dtype=np.float32)
 
@@ -252,19 +252,21 @@ def train_model(ymldict, saved=True):
                         with open(
                             "data/Train/train_bank_{}.pkl".format(xx), "rb"
                         ) as handle:
-                            train_bank[xx * 2880 : xx * 2880 + 2880, :, :, :] = pickle.load(
-                                handle
-                            )[:, :, :, :]
+                            train_bank[
+                                xx * 2880 : xx * 2880 + 2880, :, :, :
+                            ] = pickle.load(handle)[:, :, :, :]
 
                     with open("data/Validation/val_bank.pkl", "rb") as handle:
                         val_bank[:, :, :, :] = pickle.load(handle)[:, :, :, :]
 
-                elif pt_task == 'clmr':
+                elif pt_task == "clmr":
                     bank = np.zeros((102400, 2, 96, 313), dtype=np.float32)
 
                     for xx in trange(50):
                         with open("data/CLMR/clmr_pkl_{}".format(xx), "rb") as handle:
-                            bank[xx * 2048:xx * 2048 + 2048, :, :, :] = pickle.load(handle)[:, :, :, :]
+                            bank[xx * 2048 : xx * 2048 + 2048, :, :, :] = pickle.load(
+                                handle
+                            )[:, :, :, :]
 
                     print("Creating datasets...")
                     np.random.shuffle(bank)
@@ -275,11 +277,13 @@ def train_model(ymldict, saved=True):
                 else:
                     raise ValueError("Which pretext task are we running?")
 
-        if pt_task == 'zerons':
+        if pt_task == "zerons":
             np.random.shuffle(train_bank)
 
             if epoch == 0:
-                new_val_bank = np.zeros((6400 * batch_len, 2, 96, 313), dtype=np.float32)
+                new_val_bank = np.zeros(
+                    (6400 * batch_len, 2, 96, 313), dtype=np.float32
+                )
 
                 print("Creating new validation shifts...")
                 for xx in trange(6400):
@@ -290,10 +294,10 @@ def train_model(ymldict, saved=True):
                             xx, :, :, start_idx : start_idx + 313
                         ]
 
-        elif pt_task == 'clmr':
+        elif pt_task == "clmr":
             np.random.shuffle(train_bank)
 
-        else: 
+        else:
             raise ValueError("Which pretext task are we running?")
 
         full_train_loss = 0.0
@@ -303,9 +307,11 @@ def train_model(ymldict, saved=True):
         full_val_anpos = 0.0
         full_val_anneg = 0.0
 
-        if pt_task == 'zerons':
+        if pt_task == "zerons":
             for jj in range(20):
-                new_train_bank = np.zeros((1440 * batch_len, 2, 96, 313), dtype=np.float32)
+                new_train_bank = np.zeros(
+                    (1440 * batch_len, 2, 96, 313), dtype=np.float32
+                )
 
                 print("{} : Creating new training shifts...".format(jj))
                 for xx in trange(1440):
@@ -321,23 +327,35 @@ def train_model(ymldict, saved=True):
 
                 # Train epoch
                 print("{} : Training...".format(jj))
-                model, temp_train_loss, temp_train_anpos, temp_train_anneg = train_epoch(
-                    model, train_loader, criterion, optimizer
-                )
+                (
+                    model,
+                    temp_train_loss,
+                    temp_train_anpos,
+                    temp_train_anneg,
+                ) = train_epoch(model, train_loader, criterion, optimizer)
 
                 full_train_loss += temp_train_loss
                 full_train_anpos += temp_train_anpos
                 full_train_anneg += temp_train_anneg
 
-        elif pt_task == 'clmr':
+        elif pt_task == "clmr":
             for zz in range(20):
-                train_ds = TensorDataset(torch.tensor(train_bank[zz * 4096: zz * 4096 + 4096, :, :, :]).float())
+                train_ds = TensorDataset(
+                    torch.tensor(
+                        train_bank[zz * 4096 : zz * 4096 + 4096, :, :, :]
+                    ).float()
+                )
                 train_loader = DataLoader(train_ds, batch_size=batch_len, shuffle=True)
 
                 # Train epoch
                 print("{} : Training...".format(zz))
-                model, temp_train_loss, temp_train_anpos, temp_train_anneg = train_epoch(
-                    model, train_loader, criterion, optimizer, pt_task='clmr'
+                (
+                    model,
+                    temp_train_loss,
+                    temp_train_anpos,
+                    temp_train_anneg,
+                ) = train_epoch(
+                    model, train_loader, criterion, optimizer, pt_task="clmr"
                 )
 
                 full_train_loss += temp_train_loss
@@ -369,7 +387,7 @@ def train_model(ymldict, saved=True):
 
         print("\n{} : Validating...".format(epoch))
 
-        if pt_task == 'zerons':
+        if pt_task == "zerons":
             for zz in trange(10):
                 val_ds = TensorDataset(
                     torch.tensor(
@@ -388,19 +406,23 @@ def train_model(ymldict, saved=True):
                 full_val_anpos += temp_val_anpos
                 full_val_anneg += temp_val_anneg
 
-        elif pt_task == 'clmr':
+        elif pt_task == "clmr":
             for hh in trange(10):
-                val_ds = TensorDataset(torch.tensor(val_bank[hh * 2048: hh * 2048 + 2048, :, :, :]).float())
+                val_ds = TensorDataset(
+                    torch.tensor(
+                        val_bank[hh * 2048 : hh * 2048 + 2048, :, :, :]
+                    ).float()
+                )
                 val_loader = DataLoader(val_ds, batch_size=batch_len, shuffle=False)
 
                 temp_val_loss, temp_val_anpos, temp_val_anneg = val_epoch(
-                    model, val_loader, criterion, optimizer, pt_task='clmr'
+                    model, val_loader, criterion, optimizer, pt_task="clmr"
                 )
 
                 full_val_loss += temp_val_loss
                 full_val_anpos += temp_val_anpos
                 full_val_anneg += temp_val_anneg
-        
+
         else:
             raise ValueError("Which pretext task are we running?")
 
@@ -465,7 +487,7 @@ def train_model(ymldict, saved=True):
     return model
 
 
-def train_epoch(model, train_loader, criterion, optimizer, pt_task='zerons'):
+def train_epoch(model, train_loader, criterion, optimizer, pt_task="zerons"):
     """
     Function for CL model training.
     -- model        : model to train
@@ -480,7 +502,7 @@ def train_epoch(model, train_loader, criterion, optimizer, pt_task='zerons'):
 
     model.train()
 
-    if pt_task == 'zerons':
+    if pt_task == "zerons":
         for batch_idx, [batch] in enumerate(tqdm(train_loader)):
             anchors = batch[:, 0:1, :, :].to(device0)
             postves = batch[:, 1:2, :, :].to(device1)
@@ -500,7 +522,7 @@ def train_epoch(model, train_loader, criterion, optimizer, pt_task='zerons'):
             full_train_anpos += sim_an_pos
             full_train_anneg += sim_an_neg
 
-    elif pt_task == 'clmr':
+    elif pt_task == "clmr":
         for batch_idx, [batch] in enumerate(tqdm(train_loader)):
             anchors = batch[:, 0:1, :, :].to(device0)
             postves = batch[:, 1:2, :, :].to(device0)
@@ -541,7 +563,7 @@ def train_epoch(model, train_loader, criterion, optimizer, pt_task='zerons'):
     return model, full_train_loss, full_train_anpos, full_train_anneg
 
 
-def val_epoch(model, val_loader, criterion, optimizer, pt_task='zerons'):
+def val_epoch(model, val_loader, criterion, optimizer, pt_task="zerons"):
     """
     Function for CL model training.
     -- model        : model to train
@@ -556,7 +578,7 @@ def val_epoch(model, val_loader, criterion, optimizer, pt_task='zerons'):
 
     model.eval()
 
-    if pt_task == 'zerons':
+    if pt_task == "zerons":
         for batch_idx, [batch] in enumerate(val_loader):
             with torch.no_grad():
                 anchors = batch[:, 0:1, :, :].to(device0)
@@ -575,7 +597,7 @@ def val_epoch(model, val_loader, criterion, optimizer, pt_task='zerons'):
                 full_val_anpos += sim_an_pos
                 full_val_anneg += sim_an_neg
 
-    elif pt_task == 'clmr':
+    elif pt_task == "clmr":
         for batch_idx, [batch] in enumerate(val_loader):
             with torch.no_grad():
                 anchors = batch[:, 0:1, :, :].to(device0)
