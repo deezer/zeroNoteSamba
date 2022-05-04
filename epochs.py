@@ -4,7 +4,7 @@ from processing.evaluate import beat_tracking as eval
 
 
 def train_epoch(
-    model, criterion, optimizer, _status, indices, real_times, inputs, masks, threshold
+    model, criterion, optimizer, _status, indices, real_times, inputs, masks, threshold, librosa
 ):
     """
     Training epoch.
@@ -17,6 +17,7 @@ def train_epoch(
     -- inputs : spectrograms of audio to feed to NN
     -- masks : beat activation functions
     -- threshold : threshold value for evaluation
+    -- librosa : use librosa DP for beat picking?
     """
     full_loss, f_measure, cmlc, cmlt, amlc, amlt, info_gain = (
         0.0,
@@ -74,7 +75,7 @@ def train_epoch(
 
         cpu_output = output.squeeze(0).cpu().detach().numpy()
 
-        res = eval(cpu_output, times, threshold=threshold)
+        res = eval(cpu_output, times, threshold=threshold, librosa=librosa)
         f_measure += res[0]
         cmlc += res[1]
         cmlt += res[2]
@@ -93,7 +94,7 @@ def train_epoch(
     return model, optimizer, full_loss, f_measure, cmlc, cmlt, amlc, amlt, info_gain
 
 
-def val_epoch(model, criterion, _status, indices, real_times, inputs, masks, threshold):
+def val_epoch(model, criterion, _status, indices, real_times, inputs, masks, threshold, librosa):
     """
     Validation epoch.
     -- model : model to train
@@ -104,6 +105,7 @@ def val_epoch(model, criterion, _status, indices, real_times, inputs, masks, thr
     -- inputs : signals or spectrograms of audio to feed to NN
     -- masks : beat activation functions
     -- threshold : threshold value for evaluation
+    -- librosa : use librosa DP for beat picking?
     """
     full_loss, f_measure, cmlc, cmlt, amlc, amlt, info_gain = (
         0.0,
@@ -155,7 +157,7 @@ def val_epoch(model, criterion, _status, indices, real_times, inputs, masks, thr
 
             cpu_output = output.squeeze(0).cpu().detach().numpy()
 
-            res = eval(cpu_output, times, threshold=threshold)
+            res = eval(cpu_output, times, threshold=threshold, librosa=librosa)
             f_measure += res[0]
             cmlc += res[1]
             cmlt += res[2]

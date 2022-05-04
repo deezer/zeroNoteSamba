@@ -112,6 +112,7 @@ def train_model(wavs, inputs, masks, real_times, data_set, ymldict):
                     inputs,
                     masks,
                     threshold,
+                    librosa
                 )
 
                 print("\nMean training loss     is {:.3f}.".format(full_train_loss))
@@ -126,6 +127,7 @@ def train_model(wavs, inputs, masks, real_times, data_set, ymldict):
                     inputs,
                     masks,
                     threshold,
+                    librosa
                 )
 
                 print("\nMean validation loss     is {:.3f}.".format(full_val_loss))
@@ -176,6 +178,7 @@ def train_model(wavs, inputs, masks, real_times, data_set, ymldict):
                 inputs,
                 masks,
                 threshold,
+                librosa
             )
 
             print("\n-- Test Set --")

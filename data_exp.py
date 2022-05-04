@@ -23,6 +23,16 @@ def train_model(wavs, vqts, beat_pulse, real_beat_times, data_set, ymldict):
     _pre = ymldict.get("{}_pre".format(data_set))
     _exp = ymldict.get("{}_exp".format(data_set))
     _lr = ymldict.get("{}_lr".format(data_set))
+    _eval = ymldict.get("{}_eval".format(data_set))
+
+    threshold = False
+    librosa = False
+
+    if _eval == "threshold":
+        threshold = True
+
+    elif _eval == "librosa":
+        librosa = True
 
     random.Random(16).shuffle(wavs)
 
@@ -45,7 +55,7 @@ def train_model(wavs, vqts, beat_pulse, real_beat_times, data_set, ymldict):
 
         print("\nTrain set size is {}.".format(train_len))
 
-        for jj in range(10):
+        for jj in range(2):
             # Load everything
             criterion, optimizer, model = load_models(_status, _pre, _lr)
 
@@ -63,7 +73,7 @@ def train_model(wavs, vqts, beat_pulse, real_beat_times, data_set, ymldict):
             best_f1 = 0.0
 
             # Train model
-            for _ in trange(500):
+            for _ in trange(1):
                 (
                     model,
                     optimizer,
@@ -83,7 +93,8 @@ def train_model(wavs, vqts, beat_pulse, real_beat_times, data_set, ymldict):
                     real_beat_times,
                     vqts,
                     beat_pulse,
-                    False,
+                    threshold,
+                    librosa
                 )
 
                 full_val_loss, val_f_measure, _, _, _, _, _ = val_epoch(
@@ -94,7 +105,8 @@ def train_model(wavs, vqts, beat_pulse, real_beat_times, data_set, ymldict):
                     real_beat_times,
                     vqts,
                     beat_pulse,
-                    False,
+                    threshold,
+                    librosa
                 )
 
                 if val_f_measure > best_f1:
@@ -142,7 +154,8 @@ def train_model(wavs, vqts, beat_pulse, real_beat_times, data_set, ymldict):
                 real_beat_times,
                 vqts,
                 beat_pulse,
-                False,
+                threshold,
+                librosa
             )
 
             print("\n-- Test Set {} --".format(jj))
