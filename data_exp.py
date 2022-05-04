@@ -6,7 +6,6 @@ from tqdm import trange
 from loader import load_models
 from epochs import train_epoch, val_epoch
 from models.models import DS_CNN, Down_CNN
-from processing.evaluate import beat_tracking as eval
 
 
 def train_model(wavs, vqts, beat_pulse, real_beat_times, data_set, ymldict):
