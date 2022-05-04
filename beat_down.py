@@ -89,7 +89,7 @@ def train_model(wavs, inputs, masks, real_times, data_set, ymldict):
             best_f1 = 0.0
 
             # Train model
-            for epoch in range(1):
+            for epoch in range(500):
                 print("\n-- Epoch {} --".format(epoch))
 
                 (
