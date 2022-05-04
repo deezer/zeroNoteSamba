@@ -7,7 +7,6 @@ import numpy as np
 from loader import load_models
 from epochs import train_epoch, val_epoch
 from models.models import DS_CNN, Down_CNN
-from processing.evaluate import beat_tracking as eval
 
 
 def train_model(
@@ -37,16 +36,19 @@ def train_model(
     _status = ymldict.get("cross_status")
     _pre = ymldict.get("cross_pre")
     _train_set = ymldict.get("cross_train_set")
-
-    random.shuffle(train_wavs)
-
     _lr = ymldict.get("cross_lr")
     _eval = ymldict.get("cross_eval")
 
     threshold = False
+    librosa = False
 
     if _eval == "threshold":
         threshold = True
+
+    elif _eval == "librosa":
+        librosa = True
+
+    random.shuffle(train_wavs)
 
     cv_len = len(train_wavs) / 8
 
@@ -114,6 +116,7 @@ def train_model(
                 train_vqts,
                 train_masks,
                 threshold,
+                librosa
             )
 
             print("\nMean training loss is {:.3f}.".format(full_train_loss))
@@ -128,6 +131,7 @@ def train_model(
                 train_vqts,
                 train_masks,
                 threshold,
+                librosa
             )
 
             print("\nMean validation loss     is {:.3f}.".format(full_val_loss))
@@ -178,6 +182,7 @@ def train_model(
             test_vqts,
             test_masks,
             threshold,
+            librosa
         )
         
         print("\n-- Test Set --")

@@ -58,9 +58,9 @@ gtzan_eval   : "dbn"                      # can be 'threshold', 'librosa', or an
 gtzan_lr     : 0.00001                    # learning rate
 
 # Cross data experiment
-cross_status    : "vanilla"               # can be 'pretrained', 'clmr', or anything else (vanilla)
+cross_status    : "clmr"               # can be 'pretrained', 'clmr', or anything else (vanilla)
 cross_pre       : "finetune"              # can be 'frozen' or 'finetune'
-cross_train_set : "ballroom"              # can be 'hainsworth', 'ballroom', or 'smc'
+cross_train_set : "smc"              # can be 'hainsworth', 'ballroom', or 'smc'
 cross_eval      : "dbn"                   # can be 'threshold' or 'dbn'
 cross_lr        : 0.00001                 # learning rate
 
