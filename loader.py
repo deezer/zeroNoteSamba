@@ -7,8 +7,8 @@ def load_models(_status, _pre, _lr):
     """
     Function for loading loss, optimizer, and model.
     -- _status : pretrained, vanilla, clmr, or samplecnn?
-    -- _pre    : frozen weights
-    -- _lr     : learning rate
+    -- _pre : frozen weights
+    -- _lr : learning rate
     """
     # Set loss function
     criterion = torch.nn.BCELoss().cuda()
