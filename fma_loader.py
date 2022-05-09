@@ -72,8 +72,8 @@ def gen_clmr(ymldict):
             ran_idx1 = random.randint(0, vqt.shape[1] - 313)
             ran_idx2 = random.randint(0, vqt.shape[1] - 313)
 
-            np_pkl[idx, 0, :, :] = vqt[:, ran_idx1:ran_idx1 + 313]
-            np_pkl[idx, 1, :, :] = vqt[:, ran_idx2:ran_idx2 + 313]
+            np_pkl[idx, 0, :, :] = vqt[:, ran_idx1 : ran_idx1 + 313]
+            np_pkl[idx, 1, :, :] = vqt[:, ran_idx2 : ran_idx2 + 313]
 
             idx += 1
 
