@@ -17,8 +17,11 @@ def convert_to_mono(signal):
         else:
             signal = (signal[:, 0] + signal[:, 1]) / 2
 
+    elif len(signal.shape == 1):
+        return signal
+
     else:
-        raise ("Signal is one-dimensional or 3D+!")
+        raise ("Signal is 3D+!")
 
     return signal
 
