@@ -55,7 +55,7 @@ def train_model(wavs, vqts, beat_pulse, real_beat_times, data_set, ymldict):
 
         print("\nTrain set size is {}.".format(train_len))
 
-        for jj in range(2):
+        for jj in range(10):
             # Load everything
             criterion, optimizer, model = load_models(_status, _pre, _lr)
 
@@ -73,7 +73,7 @@ def train_model(wavs, vqts, beat_pulse, real_beat_times, data_set, ymldict):
             best_f1 = 0.0
 
             # Train model
-            for _ in trange(1):
+            for _ in trange(500):
                 (
                     model,
                     optimizer,
