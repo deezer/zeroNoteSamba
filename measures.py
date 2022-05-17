@@ -1,6 +1,9 @@
 import os
 import yaml
+import math
 import torch
+import pickle
+import random
 import librosa
 import antropy
 import numpy as np
@@ -10,14 +13,18 @@ import soundfile as sf
 import processing.utilities as utils
 import processing.input_rep as IR
 
+from tqdm import trange
 from pathlib import Path
 from scipy.stats import kurtosis
 from openpyxl import load_workbook
 from spleeter.separator import Separator
 from madmom.features.beats import RNNBeatProcessor
+from torch.utils.data import TensorDataset, DataLoader
+from models.loss_functions import NTXent
 
 from processing.source_separation import wv_run_spleeter
 from models.models import DS_CNN, Down_CNN
+from pretext import val_epoch
 
 proc = RNNBeatProcessor()
 
@@ -140,6 +147,12 @@ def shannon_entropy(x):
     n = x**2
     c = n / d
     S = c * np.log(c**2)
+    
+    if -np.sum(S) == float("+inf"):
+        S = c * np.log(c**2 + 10e-20)
+
+    elif math.isnan(-np.sum(S)):
+        S = c * np.log(c**2 + 10e-20)
 
     return -np.sum(S)
 
@@ -174,11 +187,11 @@ def stats(embedding):
 def few_note_samba(file_path, beat_model, status, separator, spl_model, cuda_available):
     """
     Function for processing raw audio with our beat tracker from A-Z.
-    -- file_path      : wav, mp3...to be processed
-    -- beat_model     : to be used
-    -- status         : can be 'drums', 'ros', or other
-    -- separator      : Spleeter separator object
-    -- spl_model      : Spleeter model name
+    -- file_path : wav, mp3...to be processed
+    -- beat_model : to be used
+    -- status : can be 'drums', 'ros', or other
+    -- separator : Spleeter separator object
+    -- spl_model : Spleeter model name
     -- cuda_available : GPU ok or no?
     """
     signal = utils.convert_to_xxhz(file_path, 44100)
@@ -232,8 +245,8 @@ def few_note_samba(file_path, beat_model, status, separator, spl_model, cuda_ava
 def vanilla_samba(file_path, beat_model, cuda_available):
     """
     Function for processing raw audio with our beat tracker from A-Z.
-    -- file_path      : wav, mp3...to be processed
-    -- beat_model     : to be used
+    -- file_path : wav, mp3...to be processed
+    -- beat_model : to be used
     -- cuda_available : GPU ok or no?
     """
     signal = utils.convert_to_xxhz(file_path, 16000)
@@ -280,11 +293,11 @@ def gtzan_44100():
                 y = utils.convert_to_xxhz(full_fp, 44100)
                 y = y.reshape((y.shape[0]))
 
-                Path("GTZAN2/" + el).mkdir(parents=True, exist_ok=True)
+                Path("ddesblancs/gtzan/GTZAN/" + el).mkdir(parents=True, exist_ok=True)
 
-                sf.write("GTZAN2/" + el + "/" + fp, y, 44100)
+                sf.write("ddesblancs/gtzan/GTZAN/" + el + "/" + fp, y, 44100)
 
-                print("{} -- Saved {}.".format(idx, "GTZAN2/" + el + "/" + fp))
+                print("{} -- Saved {}.".format(idx, "ddesblancs/gtzan/GTZAN/" + el + "/" + fp))
 
                 idx += 1
 
@@ -321,7 +334,7 @@ def gtzan_stats(separator, spl_model, ymldict):
     ACFF = []
 
     # Define model
-    if status == "drums" or status == "ros" or status == "mix":
+    if status == "drums" or status == "ros" or status == "mix" or status == "std":
         cuda_available = torch.cuda.is_available()
 
         model = Down_CNN()
@@ -336,10 +349,14 @@ def gtzan_stats(separator, spl_model, ymldict):
 
         model.eval()
 
+        if status == "std":
+            criterion = NTXent(batch_len=16, temperature=0.25).cuda()
+            optimizer = torch.optim.Adam(params=model.parameters(), lr=0.000001)
+
     elif status == "van":
         cuda_available = torch.cuda.is_available()
 
-        model = DS_CNN(pretext=True)
+        model = DS_CNN()
 
         state_dict = torch.load(
             "models/saved/cross_ballroom_vanilla.pth", map_location=torch.device("cpu")
@@ -351,136 +368,187 @@ def gtzan_stats(separator, spl_model, ymldict):
 
         model.eval()
 
-    elif status == "rand":
+    elif status == "clmr":
         cuda_available = torch.cuda.is_available()
 
-        model = DS_CNN(pretext=True)
+        model = DS_CNN()
+
+        state_dict = torch.load(
+            "models/saved/clmr_pret_cnn_16.pth", map_location=torch.device("cpu")
+        )
+        model.load_state_dict(state_dict)
 
         if cuda_available == True:
             model = model.cuda()
 
         model.eval()
 
-    al = os.listdir("GTZAN2/")
+    elif status == "rand":
+        cuda_available = torch.cuda.is_available()
 
-    idx = 0
-    for el in al:
-        if "mf" in el:
-            continue
-        else:
-            wav_fps = os.listdir("GTZAN2/" + el)
+        model = DS_CNN()
 
-            for fp in wav_fps:
-                full_fp = "GTZAN2/" + el + "/" + fp
+        if cuda_available == True:
+            model = model.cuda()
 
-                if status == "drums" or status == "ros" or status == "mix":
-                    out = few_note_samba(
-                        full_fp, model, status, separator, spl_model, cuda_available
-                    )
+        model.eval()
 
-                elif status == "van" or status == "rand":
-                    out = vanilla_samba(full_fp, model, cuda_available)
+    if status == "std":
+        val_bank = np.zeros((6400, 2, 96, 626), dtype=np.float32)
 
-                else:
-                    out = bock_rnn(full_fp)
+        with open("data/Validation/val_bank.pkl", "rb") as handle:
+            val_bank[:, :, :, :] = pickle.load(handle)[:, :, :, :]
 
-                l2l1, gini, kurt, shan, appp, samp, acff = stats(out)
-
-                ll = [l2l1, gini, kurt, shan, appp, samp, acff]
-                inf_status = check_inf(ll)
-
-                if inf_status == False:
-                    L2L1.append(l2l1)
-                    GINI.append(gini)
-                    KURT.append(kurt)
-                    SHAN.append(shan)
-                    APPP.append(appp)
-                    SAMP.append(samp)
-                    ACFF.append(acff)
-
-                print(
-                    "{} -- L2L1: {:.8f}, GINI: {:.3f}, KURT: {:.3f}, SHAN: {:.3f}, APPP: {:.3f}, SAMP: {:.3f}, ACFF: {:.3f}.".format(
-                        idx, l2l1, gini, kurt, shan, appp, samp, acff
-                    )
-                )
-
-                idx += 1
-
-    data = {
-        "row1": [
-            np.quantile(L2L1, 0.1),
-            np.quantile(GINI, 0.1),
-            np.quantile(KURT, 0.1),
-            np.quantile(SHAN, 0.1),
-            np.quantile(APPP, 0.1),
-            np.quantile(SAMP, 0.1),
-            np.quantile(ACFF, 0.1),
-        ],
-        "row2": [
-            np.quantile(L2L1, 0.25),
-            np.quantile(GINI, 0.25),
-            np.quantile(KURT, 0.25),
-            np.quantile(SHAN, 0.25),
-            np.quantile(APPP, 0.25),
-            np.quantile(SAMP, 0.25),
-            np.quantile(ACFF, 0.25),
-        ],
-        "row3": [
-            np.quantile(L2L1, 0.5),
-            np.quantile(GINI, 0.5),
-            np.quantile(KURT, 0.5),
-            np.quantile(SHAN, 0.5),
-            np.quantile(APPP, 0.5),
-            np.quantile(SAMP, 0.5),
-            np.quantile(ACFF, 0.5),
-        ],
-        "row4": [
-            np.quantile(L2L1, 0.75),
-            np.quantile(GINI, 0.75),
-            np.quantile(KURT, 0.75),
-            np.quantile(SHAN, 0.75),
-            np.quantile(APPP, 0.75),
-            np.quantile(SAMP, 0.75),
-            np.quantile(ACFF, 0.75),
-        ],
-        "row5": [
-            np.quantile(L2L1, 0.9),
-            np.quantile(GINI, 0.9),
-            np.quantile(KURT, 0.9),
-            np.quantile(SHAN, 0.9),
-            np.quantile(APPP, 0.9),
-            np.quantile(SAMP, 0.9),
-            np.quantile(ACFF, 0.9),
-        ],
-        "row6": [
-            np.mean(L2L1),
-            np.mean(GINI),
-            np.mean(KURT),
-            np.mean(SHAN),
-            np.mean(APPP),
-            np.mean(SAMP),
-            np.mean(ACFF),
-        ],
-    }
-
-    df = pd.DataFrame(data).T
-    df = df.round(6)
-
-    if status == "drums":
-        append_df_to_excel(
-            "results/measures.xlsx",
-            df,
-            sheet_name="Sheet1",
-            startrow=7,
-            startcol=2,
-            truncate_sheet=False,
-            engine="openpyxl",
-            float_format="%.6f",
-            header=False,
-            index=False,
+        new_val_bank = np.zeros(
+            (6400 * 16, 2, 96, 313), dtype=np.float32
         )
 
-    elif status == "ros":
+        print("Creating new validation shifts...")
+        for xx in trange(6400):
+            randomlist = random.sample(range(0, 313), 16)
+
+            for ii, start_idx in enumerate(randomlist):
+                new_val_bank[xx * 16 + ii, :, :, :] = val_bank[
+                    xx, :, :, start_idx : start_idx + 313
+                ]
+
+        val_loss = []
+        val_anpos = []
+        val_anneg = []
+
+        for zz in range(10):
+            val_ds = TensorDataset(
+                torch.tensor(
+                    new_val_bank[
+                        640 * 16 * zz : 640 * 16 * (zz + 1), :, :, :
+                    ]
+                ).float()
+            )
+            val_loader = DataLoader(val_ds, batch_size=16, shuffle=False)
+
+            full_val_loss, full_val_anpos, full_val_anneg = val_epoch(
+                model, val_loader, criterion, optimizer
+            )
+
+            print("Mean validation loss: {} +/- {}.".format(np.mean(full_val_loss), np.std(full_val_loss)))
+            print("Mean an/pos CS: {} +/- {}.".format(np.mean(full_val_anpos), np.std(full_val_anpos)))
+            print("Mean an/neg CS: {} +/- {}.".format(np.mean(full_val_anneg), np.std(full_val_anneg)))
+
+            val_loss += full_val_loss
+            val_anpos += full_val_anpos
+            val_anneg += full_val_anneg
+
+        print("Full validation loss: {} +/- {}.".format(np.mean(val_loss), np.std(val_loss)))
+        print("Full an/pos CS: {} +/- {}.".format(np.mean(val_anpos), np.std(val_anpos)))
+        print("Full an/neg CS: {} +/- {}.".format(np.mean(val_anneg), np.std(val_anneg)))
+
+    else:
+        al = os.listdir("ddesblancs/gtzan/GTZAN/")
+
+        idx = 0
+        for el in al:
+            if "mf" in el:
+                continue
+            else:
+                wav_fps = os.listdir("ddesblancs/gtzan/GTZAN/" + el)
+
+                for fp in wav_fps:
+                    full_fp = "ddesblancs/gtzan/GTZAN/" + el + "/" + fp
+
+                    if status == "drums" or status == "ros" or status == "mix":
+                        out = few_note_samba(
+                            full_fp, model, status, separator, spl_model, cuda_available
+                        )
+
+                    elif status == "van" or status == "rand" or status == "clmr":
+                        out = vanilla_samba(full_fp, model, cuda_available)
+
+                    else:
+                        out = bock_rnn(full_fp)
+
+                    l2l1, gini, kurt, shan, appp, samp, acff = stats(out)
+
+                    ll = [l2l1, gini, kurt, shan, appp, samp, acff]
+                    inf_status = check_inf(ll)
+
+                    if inf_status == False:
+                        L2L1.append(l2l1)
+                        GINI.append(gini)
+                        KURT.append(kurt)
+                        SHAN.append(shan)
+                        APPP.append(appp)
+                        SAMP.append(samp)
+                        ACFF.append(acff)
+
+                    print(
+                        "{} -- L2L1: {:.8f}, GINI: {:.3f}, KURT: {:.3f}, SHAN: {:.3f}, APPP: {:.3f}, SAMP: {:.3f}, ACFF: {:.3f}.".format(
+                            idx, l2l1, gini, kurt, shan, appp, samp, acff
+                        )
+                    )
+
+                    idx += 1
+
+        data = {
+            "row1": [
+                np.quantile(L2L1, 0.1),
+                np.quantile(GINI, 0.1),
+                np.quantile(KURT, 0.1),
+                np.quantile(SHAN, 0.1),
+                np.quantile(APPP, 0.1),
+                np.quantile(SAMP, 0.1),
+                np.quantile(ACFF, 0.1),
+            ],
+            "row2": [
+                np.quantile(L2L1, 0.25),
+                np.quantile(GINI, 0.25),
+                np.quantile(KURT, 0.25),
+                np.quantile(SHAN, 0.25),
+                np.quantile(APPP, 0.25),
+                np.quantile(SAMP, 0.25),
+                np.quantile(ACFF, 0.25),
+            ],
+            "row3": [
+                np.quantile(L2L1, 0.5),
+                np.quantile(GINI, 0.5),
+                np.quantile(KURT, 0.5),
+                np.quantile(SHAN, 0.5),
+                np.quantile(APPP, 0.5),
+                np.quantile(SAMP, 0.5),
+                np.quantile(ACFF, 0.5),
+            ],
+            "row4": [
+                np.quantile(L2L1, 0.75),
+                np.quantile(GINI, 0.75),
+                np.quantile(KURT, 0.75),
+                np.quantile(SHAN, 0.75),
+                np.quantile(APPP, 0.75),
+                np.quantile(SAMP, 0.75),
+                np.quantile(ACFF, 0.75),
+            ],
+            "row5": [
+                np.quantile(L2L1, 0.9),
+                np.quantile(GINI, 0.9),
+                np.quantile(KURT, 0.9),
+                np.quantile(SHAN, 0.9),
+                np.quantile(APPP, 0.9),
+                np.quantile(SAMP, 0.9),
+                np.quantile(ACFF, 0.9),
+            ],
+            "row6": [
+                np.mean(L2L1),
+                np.mean(GINI),
+                np.mean(KURT),
+                np.mean(SHAN),
+                np.mean(APPP),
+                np.mean(SAMP),
+                np.mean(ACFF),
+            ],
+        }
+
+        df = pd.DataFrame(data).T
+        df = df.round(6)
+
+    if status == "drums":
         append_df_to_excel(
             "results/measures.xlsx",
             df,
@@ -494,7 +562,7 @@ def gtzan_stats(separator, spl_model, ymldict):
             index=False,
         )
 
-    elif status == "mix":
+    elif status == "ros":
         append_df_to_excel(
             "results/measures.xlsx",
             df,
@@ -508,12 +576,40 @@ def gtzan_stats(separator, spl_model, ymldict):
             index=False,
         )
 
-    elif status == "van":
+    elif status == "mix":
         append_df_to_excel(
             "results/measures.xlsx",
             df,
             sheet_name="Sheet1",
             startrow=25,
+            startcol=2,
+            truncate_sheet=False,
+            engine="openpyxl",
+            float_format="%.6f",
+            header=False,
+            index=False,
+        )
+
+    elif status == "van":
+        append_df_to_excel(
+            "results/measures.xlsx",
+            df,
+            sheet_name="Sheet1",
+            startrow=31,
+            startcol=2,
+            truncate_sheet=False,
+            engine="openpyxl",
+            float_format="%.6f",
+            header=False,
+            index=False,
+        )
+
+    elif status == "clmr":
+        append_df_to_excel(
+            "results/measures.xlsx",
+            df,
+            sheet_name="Sheet1",
+            startrow=7,
             startcol=2,
             truncate_sheet=False,
             engine="openpyxl",
