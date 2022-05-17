@@ -63,9 +63,8 @@ def train_model(wavs, inputs, masks, real_times, data_set, ymldict):
         # Load everything
         criterion, optimizer, model = load_models(_status, _pre, _lr)
 
-        if (
-            (_status == "clmr" or _status == "pretrained" or _status == "vanilla")
-            and (_pre == "finetune" or _pre == "frozen")
+        if (_status == "clmr" or _status == "pretrained" or _status == "vanilla") and (
+            _pre == "finetune" or _pre == "frozen"
         ):
             val_counter = 0
 
@@ -227,7 +226,9 @@ def train_model(wavs, inputs, masks, real_times, data_set, ymldict):
                 format="pdf",
             )
 
-        elif (_status == "pretrained" or _status == "clmr" or _status == "vanilla") and _pre == "validation":
+        elif (
+            _status == "pretrained" or _status == "clmr" or _status == "vanilla"
+        ) and _pre == "validation":
             model.eval()
 
             (

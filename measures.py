@@ -147,7 +147,7 @@ def shannon_entropy(x):
     n = x**2
     c = n / d
     S = c * np.log(c**2)
-    
+
     if -np.sum(S) == float("+inf"):
         S = c * np.log(c**2 + 10e-20)
 
@@ -297,7 +297,11 @@ def gtzan_44100():
 
                 sf.write("ddesblancs/gtzan/GTZAN/" + el + "/" + fp, y, 44100)
 
-                print("{} -- Saved {}.".format(idx, "ddesblancs/gtzan/GTZAN/" + el + "/" + fp))
+                print(
+                    "{} -- Saved {}.".format(
+                        idx, "ddesblancs/gtzan/GTZAN/" + el + "/" + fp
+                    )
+                )
 
                 idx += 1
 
@@ -399,9 +403,7 @@ def gtzan_stats(separator, spl_model, ymldict):
         with open("data/Validation/val_bank.pkl", "rb") as handle:
             val_bank[:, :, :, :] = pickle.load(handle)[:, :, :, :]
 
-        new_val_bank = np.zeros(
-            (6400 * 16, 2, 96, 313), dtype=np.float32
-        )
+        new_val_bank = np.zeros((6400 * 16, 2, 96, 313), dtype=np.float32)
 
         print("Creating new validation shifts...")
         for xx in trange(6400):
@@ -419,9 +421,7 @@ def gtzan_stats(separator, spl_model, ymldict):
         for zz in range(10):
             val_ds = TensorDataset(
                 torch.tensor(
-                    new_val_bank[
-                        640 * 16 * zz : 640 * 16 * (zz + 1), :, :, :
-                    ]
+                    new_val_bank[640 * 16 * zz : 640 * 16 * (zz + 1), :, :, :]
                 ).float()
             )
             val_loader = DataLoader(val_ds, batch_size=16, shuffle=False)
@@ -430,17 +430,37 @@ def gtzan_stats(separator, spl_model, ymldict):
                 model, val_loader, criterion, optimizer
             )
 
-            print("Mean validation loss: {} +/- {}.".format(np.mean(full_val_loss), np.std(full_val_loss)))
-            print("Mean an/pos CS: {} +/- {}.".format(np.mean(full_val_anpos), np.std(full_val_anpos)))
-            print("Mean an/neg CS: {} +/- {}.".format(np.mean(full_val_anneg), np.std(full_val_anneg)))
+            print(
+                "Mean validation loss: {} +/- {}.".format(
+                    np.mean(full_val_loss), np.std(full_val_loss)
+                )
+            )
+            print(
+                "Mean an/pos CS: {} +/- {}.".format(
+                    np.mean(full_val_anpos), np.std(full_val_anpos)
+                )
+            )
+            print(
+                "Mean an/neg CS: {} +/- {}.".format(
+                    np.mean(full_val_anneg), np.std(full_val_anneg)
+                )
+            )
 
             val_loss += full_val_loss
             val_anpos += full_val_anpos
             val_anneg += full_val_anneg
 
-        print("Full validation loss: {} +/- {}.".format(np.mean(val_loss), np.std(val_loss)))
-        print("Full an/pos CS: {} +/- {}.".format(np.mean(val_anpos), np.std(val_anpos)))
-        print("Full an/neg CS: {} +/- {}.".format(np.mean(val_anneg), np.std(val_anneg)))
+        print(
+            "Full validation loss: {} +/- {}.".format(
+                np.mean(val_loss), np.std(val_loss)
+            )
+        )
+        print(
+            "Full an/pos CS: {} +/- {}.".format(np.mean(val_anpos), np.std(val_anpos))
+        )
+        print(
+            "Full an/neg CS: {} +/- {}.".format(np.mean(val_anneg), np.std(val_anneg))
+        )
 
     else:
         al = os.listdir("ddesblancs/gtzan/GTZAN/")
