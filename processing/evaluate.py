@@ -46,7 +46,12 @@ def beat_tracking(
 
     else:
         beat_dbn.reset()
-        estimated_beats = beat_dbn.process_offline(output)
+        try:
+            estimated_beats = beat_dbn.process_offline(output)
+        except:
+            beat_dbn.correct = False
+            estimated_beats = beat_dbn.process_offline(output)
+            beat_dbn.correct = True
 
     estimated_beats = mir_eval.beat.trim_beats(estimated_beats)
 
