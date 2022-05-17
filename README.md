@@ -22,7 +22,7 @@ cd zeroNoteSamba
 pip install -r requirements.txt
 
 # Unzip model weights file
-unzip models/saved/shift_pret_cnn_16.pth.zip -d models/saved/
+gzip -d models/saved/shift_pret_cnn_16.pth.gz
 
 # Download sample audio example
 wget https://github.com/deezer/spleeter/raw/master/audio_example.mp3
