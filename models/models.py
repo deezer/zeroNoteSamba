@@ -46,7 +46,7 @@ class _CNN(nn.Module):
     def forward(self, x):
         """
         Pass input through convolutional layers.
-        -- x : input (vqt)
+        -- x: input (vqt)
         """
         out = self.cv1(x)
         out = self.relu(out)
@@ -105,7 +105,7 @@ class DS_CNN(nn.Module):
     def forward(self, x):
         """
         Pass input through convolutional and recurrent layers.
-        -- x : input (vqt)
+        -- x: input (vqt)
         """
         x = self.pretrained(x)
 

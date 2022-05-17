@@ -5,7 +5,7 @@ import librosa as audio_lib
 def compute_rms(signal):
     """
     Function for combining a signal's Root Mean Square (RMS) value.
-    -- signal : input waveform
+    -- signal: input waveform
     """
     rms = audio_lib.feature.rms(y=signal, frame_length=2048, hop_length=512)
 
@@ -19,10 +19,10 @@ def compute_rms(signal):
 def check_CL_clips(anchor, positive, lower_p, upper_p):
     """
     Function for thresholding anchor vs positive. Goal is to make sure drum clip has enough energy.
-    -- anchor   : selected stem combination
-    -- positive : other stem combination
-    -- lower_p  : lower RMS percentage threshold
-    -- upper_p  : upper RMS percentage threshold
+    -- anchor: selected stem combination
+    -- positive: other stem combination
+    -- lower_p: lower RMS percentage threshold
+    -- upper_p: upper RMS percentage threshold
     """
     # Compute both stem and rest of signal RMS
     stem_rms, _, _ = compute_rms(anchor.T)
@@ -49,8 +49,8 @@ def check_CL_clips(anchor, positive, lower_p, upper_p):
 def check_drum_stem(stems, ymldict):
     """
     Function for thresholding drums. Goal is to make sure drum clip has enough energy.
-    -- stems   : dictionary with stems and their names
-    -- ymldict   : dictionary with yaml parameters
+    -- stems: dictionary with stems and their names
+    -- ymldict: dictionary with yaml parameters
     """
     # Load desired variables
     lower_p = ymldict.get("lower_p")

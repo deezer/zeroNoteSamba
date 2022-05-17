@@ -21,7 +21,7 @@ import processing.source_separation as source_separation
 def gen_clmr(ymldict):
     """
     Generate CLMR examples.
-    -- ymldict : dictionary with yaml parameters
+    -- ymldict: dictionary with yaml parameters
     """
     # Load desired variables
     fma_dir = ymldict.get("pt_data_dir")
@@ -91,8 +91,8 @@ def gen_clmr(ymldict):
 def full_fma_stem_check(separator, ymldict):
     """
     Function that writes csv files with good stem files.
-    -- separator : Spleeter separator
-    -- ymldict   : dictionary with yaml parameters
+    -- separator: Spleeter separator
+    -- ymldict: dictionary with yaml parameters
     """
     # Load desired variables
     fma_dir = ymldict.get("pt_data_dir")
@@ -164,10 +164,10 @@ def drum_load(filename, separator, sr, ymldict):
     """
     We run Spleeter on the input file.
     Return RMS status, full signal, and stems.
-    -- filename  : file to stem check
-    -- separator : Spleeter separator
-    -- sr        : sample rate
-    -- ymldict   : dictionary with yaml parameters
+    -- filename: file to stem check
+    -- separator: Spleeter separator
+    -- sr: sample rate
+    -- ymldict: dictionary with yaml parameters
     """
     spl_mod = ymldict.get("spl_mod")
 

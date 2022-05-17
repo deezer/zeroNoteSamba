@@ -9,9 +9,9 @@ import librosa.display as display
 def generate_XQT(signal, sample_rate, mode):
     """
     Generates a high-resolution XQT spectrogram.
-    -- signal      : signal to compute XQT on
-    -- sample_rate : self-explanatory
-    -- mode        : can be either vqt or cqt
+    -- signal: signal to compute XQT on
+    -- sample_rate: self-explanatory
+    -- mode: can be either vqt or cqt
     """
     hop_length = 256
     first_note = "C0"
@@ -58,9 +58,9 @@ def generate_XQT(signal, sample_rate, mode):
 def plot_XQT(cqt, sample_rate, title=None, save=None):
     """
     Function for plotting CQT.
-    -- cqt         : Constant Q-Transform matrix
-    -- sample_rate : SR in Hz
-    -- title       : plot title
+    -- cqt: Constant Q-Transform matrix
+    -- sample_rate: SR in Hz
+    -- title: plot title
     """
     fig, ax = plt.subplots()
     dB = audio_lib.amplitude_to_db(cqt, ref=np.max)

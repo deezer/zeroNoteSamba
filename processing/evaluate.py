@@ -14,12 +14,12 @@ def beat_tracking(
 ):
     """
     Compute F1-score using standard mir_eval function.
-    -- output : pulse output by model
-    -- reference_beats : array of beat times
-    -- threshold : threshold activation for beat times
-    -- librosa : use Ellis DP for beat times
-    -- thresh_val : threshold value for beat times
-    -- fps : features per second
+    -- output: pulse output by model
+    -- reference_beats: array of beat times
+    -- threshold: threshold activation for beat times
+    -- librosa: use Ellis DP for beat times
+    -- thresh_val: threshold value for beat times
+    -- fps: features per second
     """
     reference_beats = np.array(reference_beats)
     reference_beats = mir_eval.beat.trim_beats(reference_beats)

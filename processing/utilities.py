@@ -5,7 +5,7 @@ import librosa as audio_lib
 def convert_to_mono(signal):
     """
     Converts signal to mono.
-    -- signal : 2D array with shape = 2 in dim1 or dim2
+    -- signal: 2D array with shape = 2 in dim1 or dim2
     """
     if len(signal.shape) == 2:
         if signal.shape[0] == 1:
@@ -29,8 +29,8 @@ def convert_to_mono(signal):
 def convert_to_xxhz(f, sample_rate):
     """
     Function for downsampling wav files to sample_rate kHz. Writes re-named file to same directory.
-    -- f            : file name
-    -- sample_rate  : new sample rate
+    -- f: file name
+    -- sample_rate: new sample rate
     """
     if f.endswith(".wav") or f.endswith(".mp3"):
         y, _ = audio_lib.load(f, sr=sample_rate)
@@ -44,7 +44,7 @@ def convert_to_xxhz(f, sample_rate):
 def preprocess(fp):
     """
     Convert file to 16000 Hz.
-    -- fp : file path
+    -- fp: file path
     """
     y = convert_to_xxhz(fp, 16000)
     y = np.reshape(y, y.shape[0])

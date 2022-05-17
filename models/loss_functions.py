@@ -10,10 +10,10 @@ class NTXent(nn.Module):
     def __init__(self, batch_len, temperature=0.25, in_features=626, mode="CS"):
         """
         Arguments:
-        -- batch_len   : batch size
-        -- temperature : parameter
-        -- in_features : input vector dimensions
-        -- mode        : cosine or bilinear similarity
+        -- batch_len: batch size
+        -- temperature: parameter
+        -- in_features: input vector dimensions
+        -- mode: cosine or bilinear similarity
         """
         super(NTXent, self).__init__()
 
@@ -30,8 +30,8 @@ class NTXent(nn.Module):
     def forward(self, anchors, poss):
         """
         Arguments:
-        -- anchors : tensor of shape (batch_len, embedding_size)
-        -- poss    : tensor of shape (batch_len, embedding_size)
+        -- anchors: tensor of shape (batch_len, embedding_size)
+        -- poss: tensor of shape (batch_len, embedding_size)
         """
         full_loss = torch.zeros(self.batch_len)
 

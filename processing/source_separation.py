@@ -1,8 +1,8 @@
 def wv_run_spleeter(y, sr, separator, model):
     """
     Run Spleeter on a waveform file. Spleeter stems saved.
-    -- y         : input as np array
-    -- model     : Spleeter separation model
+    -- y: input as np array
+    -- model: Spleeter separation model
     """
     valid_models = {
         "2stems",

@@ -14,12 +14,12 @@ from processing.evaluate import beat_tracking as eval
 def train_model(wavs, inputs, masks, real_times, data_set, ymldict):
     """
     Function for training model on Ballroom data set.
-    -- wavs : list of files
-    -- inputs : spectrograms of audio to feed to NN
-    -- masks : pulse vectors
-    -- real_times : list with real times in seconds
-    -- data_set : data set we are running our experiment on
-    -- ymldict : YAML parameters
+    -- wavs: list of files
+    -- inputs: spectrograms of audio to feed to NN
+    -- masks: pulse vectors
+    -- real_times: list with real times in seconds
+    -- data_set: data set we are running our experiment on
+    -- ymldict: YAML parameters
     """
     # Load the experiment stuff:
     _status = ymldict.get("{}_status".format(data_set))

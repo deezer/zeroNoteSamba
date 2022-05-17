@@ -11,12 +11,12 @@ from models.models import DS_CNN, Down_CNN
 def train_model(wavs, vqts, beat_pulse, real_beat_times, data_set, ymldict):
     """
     Function for training model on GTZAN data set.
-    -- wavs : list of wav files (dictionary keys)
-    -- vqts : spectrograms of audio
-    -- beat_pulse : beat tracking pulse vectors
-    -- real_beat_times : list with real beat tracking times in seconds
-    -- data_set : data set we are running our experiment on
-    -- ymldict : YAML parameters
+    -- wavs: list of wav files (dictionary keys)
+    -- vqts: spectrograms of audio
+    -- beat_pulse: beat tracking pulse vectors
+    -- real_beat_times: list with real beat tracking times in seconds
+    -- data_set: data set we are running our experiment on
+    -- ymldict: YAML parameters
     """
     # Load the experiment stuff:
     _status = ymldict.get("{}_status".format(data_set))

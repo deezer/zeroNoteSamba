@@ -17,16 +17,16 @@ def train_epoch(
 ):
     """
     Training epoch.
-    -- model : model to train
-    -- criterion : loss function
-    -- optimizer : self-explanatory
-    -- _status : pretrained model?
-    -- indices : set indices
-    -- real_times : real beat times
-    -- inputs : spectrograms of audio to feed to NN
-    -- masks : beat activation functions
-    -- threshold : threshold value for evaluation
-    -- librosa : use librosa DP for beat picking?
+    -- model: model to train
+    -- criterion: loss function
+    -- optimizer: self-explanatory
+    -- _status: pretrained model?
+    -- indices: set indices
+    -- real_times: real beat times
+    -- inputs: spectrograms of audio to feed to NN
+    -- masks: beat activation functions
+    -- threshold: threshold value for evaluation
+    -- librosa: use librosa DP for beat picking?
     """
     full_loss, f_measure, cmlc, cmlt, amlc, amlt, info_gain = (
         0.0,
@@ -108,15 +108,15 @@ def val_epoch(
 ):
     """
     Validation epoch.
-    -- model : model to train
-    -- criterion : loss function
-    -- _status : pretrained model?
-    -- indices : set indices
-    -- real_times : real beat times
-    -- inputs : signals or spectrograms of audio to feed to NN
-    -- masks : beat activation functions
-    -- threshold : threshold value for evaluation
-    -- librosa : use librosa DP for beat picking?
+    -- model: model to train
+    -- criterion: loss function
+    -- _status: pretrained model?
+    -- indices: set indices
+    -- real_times: real beat times
+    -- inputs: signals or spectrograms of audio to feed to NN
+    -- masks: beat activation functions
+    -- threshold: threshold value for evaluation
+    -- librosa: use librosa DP for beat picking?
     """
     full_loss, f_measure, cmlc, cmlt, amlc, amlt, info_gain = (
         0.0,

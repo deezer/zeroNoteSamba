@@ -121,7 +121,7 @@ def append_df_to_excel(
 def l2_l1_ratio(x):
     """
     Ratio of l2 and l1 norms of a numpy array.
-    -- x : array to be studied
+    -- x: array to be studied
     """
     return np.linalg.norm(x, ord=2) / np.linalg.norm(x, ord=1)
 
@@ -129,7 +129,7 @@ def l2_l1_ratio(x):
 def gini_index(x):
     """
     Gini coefficient of a numpy array.
-    -- x : array to be studied
+    -- x: array to be studied
     """
     x = np.sort(x)
     k = np.arange(1, x.shape[0] + 1)
@@ -141,7 +141,7 @@ def gini_index(x):
 def shannon_entropy(x):
     """
     Shannon entropy of a numpy array.
-    -- x : array to be studied
+    -- x: array to be studied
     """
     d = (np.linalg.norm(x, ord=2)) ** 2
     n = x**2
@@ -160,7 +160,7 @@ def shannon_entropy(x):
 def max_acf(x):
     """
     Auto-correlate embedding for maximum a second and return max AC value between 0.25 and 1s shifts.
-    -- x : array to be studied
+    -- x: array to be studied
     """
     x = x - x.mean()
     ac = librosa.autocorrelate(x, max_size=250)
@@ -171,7 +171,7 @@ def max_acf(x):
 def stats(embedding):
     """
     Function to calculate stats on embeddings.
-    -- embedding : to be studied
+    -- embedding: to be studied
     """
     l2l1 = l2_l1_ratio(embedding)
     gini = gini_index(embedding)
@@ -187,12 +187,12 @@ def stats(embedding):
 def few_note_samba(file_path, beat_model, status, separator, spl_model, cuda_available):
     """
     Function for processing raw audio with our beat tracker from A-Z.
-    -- file_path : wav, mp3...to be processed
-    -- beat_model : to be used
-    -- status : can be 'drums', 'ros', or other
-    -- separator : Spleeter separator object
-    -- spl_model : Spleeter model name
-    -- cuda_available : GPU ok or no?
+    -- file_path: wav, mp3...to be processed
+    -- beat_model: to be used
+    -- status: can be 'drums', 'ros', or other
+    -- separator: Spleeter separator object
+    -- spl_model: Spleeter model name
+    -- cuda_available: GPU ok or no?
     """
     signal = utils.convert_to_xxhz(file_path, 44100)
     stems = wv_run_spleeter(signal, 44100, separator, spl_model)
@@ -245,9 +245,9 @@ def few_note_samba(file_path, beat_model, status, separator, spl_model, cuda_ava
 def vanilla_samba(file_path, beat_model, cuda_available):
     """
     Function for processing raw audio with our beat tracker from A-Z.
-    -- file_path : wav, mp3...to be processed
-    -- beat_model : to be used
-    -- cuda_available : GPU ok or no?
+    -- file_path: wav, mp3...to be processed
+    -- beat_model: to be used
+    -- cuda_available: GPU ok or no?
     """
     signal = utils.convert_to_xxhz(file_path, 16000)
     signal = utils.convert_to_mono(signal)
@@ -267,7 +267,7 @@ def vanilla_samba(file_path, beat_model, cuda_available):
 def bock_rnn(file_path):
     """
     Function for processing audio through Bock's 2011 RNN.
-    -- file_path : wav, mp3...to be processed
+    -- file_path: wav, mp3...to be processed
     """
     output = proc(file_path)
 
@@ -305,7 +305,7 @@ def gtzan_44100():
 def check_inf(l):
     """
     Check if any list elements are inf.
-    -- l : list
+    -- l: list
     """
     for el in l:
         if el == float("+inf"):
@@ -317,8 +317,8 @@ def check_inf(l):
 def gtzan_stats(separator, spl_model, ymldict):
     """
     Function for iterating through the Gtzan dataset and computing measurements on embeddings.
-    -- separator : Spleeter separator object
-    -- spl_model : Spleeter model name
+    -- separator: Spleeter separator object
+    -- spl_model: Spleeter model name
     """
     # Get experiment status
     model = ymldict.get("spl_mod")

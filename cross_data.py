@@ -22,15 +22,15 @@ def train_model(
 ):
     """
     Function for training model on Hainsworth data set.
-    -- train_wavs : list of training wav files (dictionary keys)
-    -- train_vqts : training spectrograms of audio
-    -- train_masks : training beat tracking pulse vectors
-    -- train_real_times : training list with real beat tracking times in seconds
-    -- test_wavs : list of test wav files (dictionary keys)
-    -- test_vqts : test spectrograms of audio
-    -- test_masks : test tracking pulse vectors
-    -- test_real_times : test list with real beat tracking times in seconds
-    -- ymldict : YAML parameters
+    -- train_wavs: list of training wav files (dictionary keys)
+    -- train_vqts: training spectrograms of audio
+    -- train_masks: training beat tracking pulse vectors
+    -- train_real_times: training list with real beat tracking times in seconds
+    -- test_wavs: list of test wav files (dictionary keys)
+    -- test_vqts: test spectrograms of audio
+    -- test_masks: test tracking pulse vectors
+    -- test_real_times: test list with real beat tracking times in seconds
+    -- ymldict: YAML parameters
     """
     # Load the Hainsworth stuff:
     _status = ymldict.get("cross_status")

@@ -8,9 +8,9 @@ from tqdm import tqdm
 def dp_ellis(wavs, signals, real_times):
     """
     Function for running librosa's algorithm for beat tracking.
-    -- wavs : list of files
-    -- signals : spectrograms of audio
-    -- real_times : list with real times in seconds
+    -- wavs: list of files
+    -- signals: spectrograms of audio
+    -- real_times: list with real times in seconds
     """
     test_f_measure, test_cmlc, test_cmlt, test_amlc, test_amlt, test_info_gain = (
         [],

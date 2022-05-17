@@ -30,8 +30,8 @@ plt.rcParams["figure.figsize"] = (15, 5)
 def drum_anchor_positive(stems, ymldict):
     """
     Function for generating anchor and positive samples.
-    -- stems       : dictionary of stem names and signals
-    -- ymldict     : YAML dictionary
+    -- stems: dictionary of stem names and signals
+    -- ymldict: YAML dictionary
     """
     rms_bool = False
 
@@ -86,10 +86,10 @@ def drum_anchor_positive(stems, ymldict):
 def create_memory_bank(number_of_samples, ymldict, fps, pkl_fp):
     """
     Function for creationg a memory bank of anchors and their positives.
-    -- number_of_samples : length of memory bank
-    -- ymldict           : YAML dictionary
-    -- fps               : file paths list
-    -- pkl_fp            : pkl file name
+    -- number_of_samples: length of memory bank
+    -- ymldict: YAML dictionary
+    -- fps: file paths list
+    -- pkl_fp: pkl file name
     """
     # File paths
     random.shuffle(fps)
@@ -168,8 +168,8 @@ def train_model(ymldict, saved=True):
     """
     Function for training a model.
     Steps include batch creation and calls to training epoch.
-    -- ymldict   : YAML parameters
-    -- saved     : whether pkl files have been saved
+    -- ymldict: YAML parameters
+    -- saved: whether pkl files have been saved
     """
     # Load YAML parameters
     val_len = ymldict.get("val_len")
@@ -490,11 +490,11 @@ def train_model(ymldict, saved=True):
 def train_epoch(model, train_loader, criterion, optimizer, pt_task="zerons"):
     """
     Function for CL model training.
-    -- model        : model to train
-    -- train_loader : loader with batches that contain 1 anchor, 1 positive, and negatives
-    -- criterion    : loss function
-    -- optimizer    : optimizer defined
-    -- pt_task      : pretext task to run
+    -- model: model to train
+    -- train_loader: loader with batches that contain 1 anchor, 1 positive, and negatives
+    -- criterion: loss function
+    -- optimizer: optimizer defined
+    -- pt_task: pretext task to run
     """
     full_train_loss = 0.0
     full_train_anpos = 0.0
@@ -566,11 +566,11 @@ def train_epoch(model, train_loader, criterion, optimizer, pt_task="zerons"):
 def val_epoch(model, val_loader, criterion, optimizer, pt_task="zerons"):
     """
     Function for CL model training.
-    -- model        : model to train
-    -- val_loader   : loader with batches that contain 1 anchor, 1 positive, and negatives
-    -- criterion    : loss function
-    -- optimizer    : optimizer defined
-    -- pt_task      : pretext task to run
+    -- model: model to train
+    -- val_loader: loader with batches that contain 1 anchor, 1 positive, and negatives
+    -- criterion: loss function
+    -- optimizer: optimizer defined
+    -- pt_task: pretext task to run
     """
     full_val_loss = 0.0
     full_val_anpos = 0.0
