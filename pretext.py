@@ -1,25 +1,23 @@
 import os
-import yaml
-import torch
+import pickle
 import random
 import shutil
-import pickle
+from random import randint
 
-import numpy as np
 import librosa as audio_lib
 import matplotlib.pyplot as plt
-
-from tqdm import tqdm, trange
-from random import randint
-from torch.utils.data import TensorDataset, DataLoader
+import numpy as np
+import processing.input_rep as input_rep
 
 # File imports
 import processing.stem_check as stem_check
-import processing.input_rep as input_rep
-
-from models.models import Pretext_CNN, DS_CNN
-from models.loss_functions import NTXent
+import torch
+import yaml
 from fma_loader import gen_clmr
+from models.loss_functions import NTXent
+from models.models import DS_CNN, Pretext_CNN
+from torch.utils.data import DataLoader, TensorDataset
+from tqdm import tqdm, trange
 
 device0 = torch.device("cuda:0")
 device1 = torch.device("cuda:1")
@@ -208,7 +206,6 @@ def train_model(ymldict, saved=True):
 
     # Train model
     for epoch in range(epochs):
-
         print("\n--- Epoch {} ---\n".format(epoch))
 
         # Create data loader

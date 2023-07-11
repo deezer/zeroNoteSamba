@@ -1,11 +1,11 @@
-import torch
 import random
-import numpy as np
 
-from tqdm import trange
-from loader import load_models
+import numpy as np
+import torch
 from epochs import train_epoch, val_epoch
+from loader import load_models
 from models.models import DS_CNN, Down_CNN
+from tqdm import trange
 
 
 def train_model(wavs, vqts, beat_pulse, real_beat_times, data_set, ymldict):
@@ -45,7 +45,6 @@ def train_model(wavs, vqts, beat_pulse, real_beat_times, data_set, ymldict):
     train_lens = [1, 2, 3, 4, 6, 8, 12, 16, 24, 32, 48, 64, 96]
 
     for train_len in train_lens:
-
         f1 = []
         cmlc = []
         cmlt = []

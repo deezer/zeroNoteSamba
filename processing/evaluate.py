@@ -1,7 +1,6 @@
 import librosa as audio_lib
 import mir_eval
 import numpy as np
-
 from madmom.features import DBNBeatTrackingProcessor
 
 beat_dbn = DBNBeatTrackingProcessor(

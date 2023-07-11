@@ -1,30 +1,29 @@
-import os
-import yaml
 import math
-import torch
+import os
 import pickle
 import random
-import librosa
+from pathlib import Path
+
 import antropy
+import librosa
 import numpy as np
 import pandas as pd
-import soundfile as sf
-
-import processing.utilities as utils
 import processing.input_rep as IR
-
-from tqdm import trange
-from pathlib import Path
-from scipy.stats import kurtosis
-from openpyxl import load_workbook
-from spleeter.separator import Separator
+import processing.utilities as utils
+import soundfile as sf
+import torch
+import yaml
 from madmom.features.beats import RNNBeatProcessor
-from torch.utils.data import TensorDataset, DataLoader
 from models.loss_functions import NTXent
-
-from processing.source_separation import wv_run_spleeter
 from models.models import DS_CNN, Down_CNN
+from openpyxl import load_workbook
 from pretext import val_epoch
+from processing.source_separation import wv_run_spleeter
+from scipy.stats import kurtosis
+from torch.utils.data import DataLoader, TensorDataset
+from tqdm import trange
+
+from spleeter.separator import Separator
 
 proc = RNNBeatProcessor()
 
@@ -306,12 +305,12 @@ def gtzan_44100():
                 idx += 1
 
 
-def check_inf(l):
+def check_inf(list_of_floats):
     """
     Check if any list elements are inf.
     -- l: list
     """
-    for el in l:
+    for el in list_of_floats:
         if el == float("+inf"):
             return True
 

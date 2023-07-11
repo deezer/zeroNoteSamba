@@ -1,20 +1,19 @@
-import yaml
-import torch
 import pickle
-import numpy as np
-import librosa as audio_lib
 
-from spleeter.separator import Separator
+import beat_down as BD
+import data_exp as DE
+import librosa as audio_lib
+import numpy as np
+import old_school as DP
+import processing.input_rep as IR
+import processing.source_separation as source_separation
 
 # File imports
 import processing.utilities as utils
-import processing.input_rep as IR
-import beat_down as BD
-import data_exp as DE
-import old_school as DP
+import torch
+import yaml
 
-import processing.source_separation as source_separation
-
+from spleeter.separator import Separator
 
 if __name__ == "__main__":
     save = True
@@ -43,21 +42,21 @@ if __name__ == "__main__":
         idx = 0
         for el in songs:
             if idx > 12:
-                l = el.split("<sep>")
+                line = el.split("<sep>")
 
-                wav = l[0]
+                wav = line[0]
                 wav = wav.replace("\t", "")
                 wav = wav.replace("\n", "")
                 wav = wav.replace(" ", "")
                 wavs.append(wav)
 
-                beat = l[10]
+                beat = line[10]
                 beat = beat.replace("\t", "")
                 beat = beat.replace("\n", "")
                 beat = beat.replace(" ", "")
                 beats.append(beat)
 
-                down = l[11]
+                down = line[11]
                 down = down.replace("\t", "")
                 down = down.replace("\n", "")
                 down = down.replace(" ", "")

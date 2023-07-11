@@ -14,7 +14,6 @@ def wv_run_spleeter(y, sr, separator, model):
     }
 
     if model in valid_models:
-
         if "16kHz" in model and sr != 16000:
             raise Exception("Model is 16kHz but sound is not!")
 

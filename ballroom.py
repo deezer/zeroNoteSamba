@@ -1,21 +1,20 @@
 import os
-import yaml
 import pickle
-import torch
-import numpy as np
-import librosa as audio_lib
 
-from spleeter.separator import Separator
+import beat_down as BD
+import data_exp as DE
+import librosa as audio_lib
+import numpy as np
+import old_school as DP
+import processing.input_rep as IR
+import processing.source_separation as source_separation
 
 # File imports
 import processing.utilities as utils
-import processing.input_rep as IR
-import beat_down as BD
-import data_exp as DE
-import old_school as DP
+import torch
+import yaml
 
-import processing.source_separation as source_separation
-
+from spleeter.separator import Separator
 
 if __name__ == "__main__":
     save = True

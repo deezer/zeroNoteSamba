@@ -1,14 +1,14 @@
-import torch
-import random
 import pathlib
-import numpy as np
-import matplotlib.pyplot as plt
+import random
 
-from tqdm import tqdm
-from loader import load_models
+import matplotlib.pyplot as plt
+import numpy as np
+import torch
 from epochs import train_epoch, val_epoch
+from loader import load_models
 from models.models import DS_CNN, Down_CNN
 from processing.evaluate import beat_tracking as eval
+from tqdm import tqdm
 
 
 def train_model(wavs, inputs, masks, real_times, data_set, ymldict):

@@ -1,5 +1,5 @@
-import numpy as np
 import librosa as audio_lib
+import numpy as np
 
 
 def convert_to_mono(signal):

@@ -1,21 +1,21 @@
 import os
-import yaml
 import pickle
 import random
-
-import numpy as np
-import librosa as audio_lib
-import soundfile as sf
-
-from spleeter.separator import Separator
 from pathlib import Path
-from tqdm import tqdm
+
+import librosa as audio_lib
+import numpy as np
+import processing.input_rep as input_rep
+import processing.source_separation as source_separation
+import processing.stem_check as stem_check
 
 # File imports
 import processing.utilities as utils
-import processing.input_rep as input_rep
-import processing.stem_check as stem_check
-import processing.source_separation as source_separation
+import soundfile as sf
+import yaml
+from tqdm import tqdm
+
+from spleeter.separator import Separator
 
 
 def gen_clmr(ymldict):
@@ -109,7 +109,6 @@ def full_fma_stem_check(separator, ymldict):
 
     # Iterate through directories
     for sel_dir in dir_list:
-
         if sel_dir in no_explore:
             print("{}: no exploration!".format(sel_dir))
             continue

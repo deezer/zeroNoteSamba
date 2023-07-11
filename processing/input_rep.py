@@ -1,9 +1,9 @@
 import os
-import numpy as np
-import matplotlib.pyplot as plt
 
 import librosa as audio_lib
 import librosa.display as display
+import matplotlib.pyplot as plt
+import numpy as np
 
 
 def generate_XQT(signal, sample_rate, mode):

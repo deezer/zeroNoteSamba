@@ -1,11 +1,11 @@
-import yaml
-import torch
-import random
 import pickle
-import numpy as np
+import random
 
-from loader import load_models
+import numpy as np
+import torch
+import yaml
 from epochs import train_epoch, val_epoch
+from loader import load_models
 from models.models import DS_CNN, Down_CNN
 
 
