@@ -73,17 +73,7 @@ def train_model(wavs, vqts, beat_pulse, real_beat_times, data_set, ymldict):
 
             # Train model
             for _ in trange(500):
-                (
-                    model,
-                    optimizer,
-                    full_train_loss,
-                    train_f_measure,
-                    _,
-                    _,
-                    _,
-                    _,
-                    _,
-                ) = train_epoch(
+                (model, optimizer, full_train_loss, train_f_measure, _, _, _, _, _,) = train_epoch(
                     model,
                     criterion,
                     optimizer,
@@ -137,15 +127,7 @@ def train_model(wavs, vqts, beat_pulse, real_beat_times, data_set, ymldict):
             state_dict = torch.load(mod_fp)
             test_mod.load_state_dict(state_dict)
 
-            (
-                full_test_loss,
-                test_f_measure,
-                test_cmlc,
-                test_cmlt,
-                test_amlc,
-                test_amlt,
-                test_info_gain,
-            ) = val_epoch(
+            (full_test_loss, test_f_measure, test_cmlc, test_cmlt, test_amlc, test_amlt, test_info_gain,) = val_epoch(
                 test_mod,
                 criterion,
                 _status,

@@ -12,7 +12,6 @@ import processing.source_separation as source_separation
 import processing.utilities as utils
 import torch
 import yaml
-
 from spleeter.separator import Separator
 
 if __name__ == "__main__":
@@ -82,9 +81,7 @@ if __name__ == "__main__":
 
                 print("{} -- {} :: {}".format(idx, file_path, len(sig)))
 
-                temp_stems = source_separation.wv_run_spleeter(
-                    sig, 44100, separator, model
-                )
+                temp_stems = source_separation.wv_run_spleeter(sig, 44100, separator, model)
 
                 anchor = None
                 for name, sig in temp_stems.items():
@@ -269,14 +266,10 @@ if __name__ == "__main__":
         DP.dp_ellis(wavs, signals, real_beat_times)
 
     elif _exp == "beat":
-        _ = BD.train_model(
-            wavs, vqts, beat_pulse, real_beat_times, "hainsworth", ymldict
-        )
+        _ = BD.train_model(wavs, vqts, beat_pulse, real_beat_times, "hainsworth", ymldict)
 
     elif _exp == "perc":
-        _ = DE.train_model(
-            wavs, vqts, beat_pulse, real_beat_times, "hainsworth", ymldict
-        )
+        _ = DE.train_model(wavs, vqts, beat_pulse, real_beat_times, "hainsworth", ymldict)
 
     else:
         print("YAML file for Hainsworth data set has a bug in experiment definition!")

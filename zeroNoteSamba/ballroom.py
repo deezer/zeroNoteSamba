@@ -13,7 +13,6 @@ import processing.source_separation as source_separation
 import processing.utilities as utils
 import torch
 import yaml
-
 from spleeter.separator import Separator
 
 if __name__ == "__main__":
@@ -110,9 +109,7 @@ if __name__ == "__main__":
 
                 print("{} -- {} :: {} -- {}".format(idx, dir, audio, len(sig)))
 
-                temp_stems = source_separation.wv_run_spleeter(
-                    sig, 44100, separator, model
-                )
+                temp_stems = source_separation.wv_run_spleeter(sig, 44100, separator, model)
 
                 anchor = None
                 for name, sig in temp_stems.items():

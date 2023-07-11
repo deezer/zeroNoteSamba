@@ -3,14 +3,10 @@ import mir_eval
 import numpy as np
 from madmom.features import DBNBeatTrackingProcessor
 
-beat_dbn = DBNBeatTrackingProcessor(
-    min_bpm=55, max_bpm=215, transition_lambda=100, fps=62.5, online=True
-)
+beat_dbn = DBNBeatTrackingProcessor(min_bpm=55, max_bpm=215, transition_lambda=100, fps=62.5, online=True)
 
 
-def beat_tracking(
-    output, reference_beats, threshold=False, librosa=False, thresh_val=0.075, fps=62.5
-):
+def beat_tracking(output, reference_beats, threshold=False, librosa=False, thresh_val=0.075, fps=62.5):
     """
     Compute F1-score using standard mir_eval function.
     -- output: pulse output by model
@@ -38,9 +34,7 @@ def beat_tracking(
         estimated_beats = np.asarray(estimated_beats)
 
     elif librosa == True:
-        _, beats = audio_lib.beat.beat_track(
-            sr=16000, onset_envelope=output, hop_length=256
-        )
+        _, beats = audio_lib.beat.beat_track(sr=16000, onset_envelope=output, hop_length=256)
         estimated_beats = audio_lib.frames_to_time(beats, sr=16000, hop_length=256)
 
     else:
@@ -54,9 +48,7 @@ def beat_tracking(
 
     estimated_beats = mir_eval.beat.trim_beats(estimated_beats)
 
-    f_measure = mir_eval.beat.f_measure(
-        reference_beats, estimated_beats, f_measure_threshold=0.07
-    )
+    f_measure = mir_eval.beat.f_measure(reference_beats, estimated_beats, f_measure_threshold=0.07)
     cmlc, cmlt, amlc, amlt = mir_eval.beat.continuity(reference_beats, estimated_beats)
     info_gain = mir_eval.beat.information_gain(reference_beats, estimated_beats)
 

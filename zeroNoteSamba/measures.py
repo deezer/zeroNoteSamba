@@ -20,22 +20,14 @@ from openpyxl import load_workbook
 from pretext import val_epoch
 from processing.source_separation import wv_run_spleeter
 from scipy.stats import kurtosis
+from spleeter.separator import Separator
 from torch.utils.data import DataLoader, TensorDataset
 from tqdm import trange
-
-from spleeter.separator import Separator
 
 proc = RNNBeatProcessor()
 
 
-def append_df_to_excel(
-    filename,
-    df,
-    sheet_name="Sheet1",
-    startrow=None,
-    truncate_sheet=False,
-    **to_excel_kwargs
-):
+def append_df_to_excel(filename, df, sheet_name="Sheet1", startrow=None, truncate_sheet=False, **to_excel_kwargs):
     """
     Append a DataFrame [df] to existing Excel file [filename]
     into [sheet_name] Sheet.
@@ -72,10 +64,7 @@ def append_df_to_excel(
     # Excel file doesn't exist - saving and exiting
     if not os.path.isfile(filename):
         df.to_excel(
-            filename,
-            sheet_name=sheet_name,
-            startrow=startrow if startrow is not None else 0,
-            **to_excel_kwargs
+            filename, sheet_name=sheet_name, startrow=startrow if startrow is not None else 0, **to_excel_kwargs
         )
         return
 
@@ -143,15 +132,15 @@ def shannon_entropy(x):
     -- x: array to be studied
     """
     d = (np.linalg.norm(x, ord=2)) ** 2
-    n = x**2
+    n = x ** 2
     c = n / d
-    S = c * np.log(c**2)
+    S = c * np.log(c ** 2)
 
     if -np.sum(S) == float("+inf"):
-        S = c * np.log(c**2 + 10e-20)
+        S = c * np.log(c ** 2 + 10e-20)
 
     elif math.isnan(-np.sum(S)):
-        S = c * np.log(c**2 + 10e-20)
+        S = c * np.log(c ** 2 + 10e-20)
 
     return -np.sum(S)
 
@@ -296,11 +285,7 @@ def gtzan_44100():
 
                 sf.write("ddesblancs/gtzan/GTZAN/" + el + "/" + fp, y, 44100)
 
-                print(
-                    "{} -- Saved {}.".format(
-                        idx, "ddesblancs/gtzan/GTZAN/" + el + "/" + fp
-                    )
-                )
+                print("{} -- Saved {}.".format(idx, "ddesblancs/gtzan/GTZAN/" + el + "/" + fp))
 
                 idx += 1
 
@@ -342,9 +327,7 @@ def gtzan_stats(separator, spl_model, ymldict):
 
         model = Down_CNN()
 
-        state_dict = torch.load(
-            "models/saved/shift_pret_cnn_16.pth", map_location=torch.device("cpu")
-        )
+        state_dict = torch.load("models/saved/shift_pret_cnn_16.pth", map_location=torch.device("cpu"))
         model.pretext.load_state_dict(state_dict)
 
         if cuda_available == True:
@@ -361,9 +344,7 @@ def gtzan_stats(separator, spl_model, ymldict):
 
         model = DS_CNN()
 
-        state_dict = torch.load(
-            "models/saved/cross_ballroom_vanilla.pth", map_location=torch.device("cpu")
-        )
+        state_dict = torch.load("models/saved/cross_ballroom_vanilla.pth", map_location=torch.device("cpu"))
         model.load_state_dict(state_dict)
 
         if cuda_available == True:
@@ -376,9 +357,7 @@ def gtzan_stats(separator, spl_model, ymldict):
 
         model = DS_CNN()
 
-        state_dict = torch.load(
-            "models/saved/clmr_pret_cnn_16.pth", map_location=torch.device("cpu")
-        )
+        state_dict = torch.load("models/saved/clmr_pret_cnn_16.pth", map_location=torch.device("cpu"))
         model.load_state_dict(state_dict)
 
         if cuda_available == True:
@@ -409,57 +388,29 @@ def gtzan_stats(separator, spl_model, ymldict):
             randomlist = random.sample(range(0, 313), 16)
 
             for ii, start_idx in enumerate(randomlist):
-                new_val_bank[xx * 16 + ii, :, :, :] = val_bank[
-                    xx, :, :, start_idx : start_idx + 313
-                ]
+                new_val_bank[xx * 16 + ii, :, :, :] = val_bank[xx, :, :, start_idx : start_idx + 313]
 
         val_loss = []
         val_anpos = []
         val_anneg = []
 
         for zz in range(10):
-            val_ds = TensorDataset(
-                torch.tensor(
-                    new_val_bank[640 * 16 * zz : 640 * 16 * (zz + 1), :, :, :]
-                ).float()
-            )
+            val_ds = TensorDataset(torch.tensor(new_val_bank[640 * 16 * zz : 640 * 16 * (zz + 1), :, :, :]).float())
             val_loader = DataLoader(val_ds, batch_size=16, shuffle=False)
 
-            full_val_loss, full_val_anpos, full_val_anneg = val_epoch(
-                model, val_loader, criterion, optimizer
-            )
+            full_val_loss, full_val_anpos, full_val_anneg = val_epoch(model, val_loader, criterion, optimizer)
 
-            print(
-                "Mean validation loss: {} +/- {}.".format(
-                    np.mean(full_val_loss), np.std(full_val_loss)
-                )
-            )
-            print(
-                "Mean an/pos CS: {} +/- {}.".format(
-                    np.mean(full_val_anpos), np.std(full_val_anpos)
-                )
-            )
-            print(
-                "Mean an/neg CS: {} +/- {}.".format(
-                    np.mean(full_val_anneg), np.std(full_val_anneg)
-                )
-            )
+            print("Mean validation loss: {} +/- {}.".format(np.mean(full_val_loss), np.std(full_val_loss)))
+            print("Mean an/pos CS: {} +/- {}.".format(np.mean(full_val_anpos), np.std(full_val_anpos)))
+            print("Mean an/neg CS: {} +/- {}.".format(np.mean(full_val_anneg), np.std(full_val_anneg)))
 
             val_loss += full_val_loss
             val_anpos += full_val_anpos
             val_anneg += full_val_anneg
 
-        print(
-            "Full validation loss: {} +/- {}.".format(
-                np.mean(val_loss), np.std(val_loss)
-            )
-        )
-        print(
-            "Full an/pos CS: {} +/- {}.".format(np.mean(val_anpos), np.std(val_anpos))
-        )
-        print(
-            "Full an/neg CS: {} +/- {}.".format(np.mean(val_anneg), np.std(val_anneg))
-        )
+        print("Full validation loss: {} +/- {}.".format(np.mean(val_loss), np.std(val_loss)))
+        print("Full an/pos CS: {} +/- {}.".format(np.mean(val_anpos), np.std(val_anpos)))
+        print("Full an/neg CS: {} +/- {}.".format(np.mean(val_anneg), np.std(val_anneg)))
 
     else:
         al = os.listdir("ddesblancs/gtzan/GTZAN/")
@@ -475,9 +426,7 @@ def gtzan_stats(separator, spl_model, ymldict):
                     full_fp = "ddesblancs/gtzan/GTZAN/" + el + "/" + fp
 
                     if status == "drums" or status == "ros" or status == "mix":
-                        out = few_note_samba(
-                            full_fp, model, status, separator, spl_model, cuda_available
-                        )
+                        out = few_note_samba(full_fp, model, status, separator, spl_model, cuda_available)
 
                     elif status == "van" or status == "rand" or status == "clmr":
                         out = vanilla_samba(full_fp, model, cuda_available)

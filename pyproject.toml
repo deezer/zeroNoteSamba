@@ -1,0 +1,60 @@
+[tool.poetry]
+name = "zeroNoteSamba"
+version = "0.0.1"
+description = "Self-Supervised Beat Tracking."
+authors = ["Dorian Desblancs <ddesblancs@deezer.com>"]
+license = "MIT License"
+readme = "README.md"
+repository = "https://github.com/deezer/zeroNoteSamba"
+homepage = "https://github.com/deezer/zeroNoteSamba"
+classifiers = [
+    "Environment :: Console",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: MIT License",
+    "Natural Language :: English",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3 :: Only",
+    "Topic :: Artistic Software",
+    "Topic :: Multimedia",
+    "Topic :: Multimedia :: Sound/Audio",
+    "Topic :: Multimedia :: Sound/Audio :: Analysis",
+    "Topic :: Multimedia :: Sound/Audio :: Conversion",
+    "Topic :: Scientific/Engineering",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+    "Topic :: Scientific/Engineering :: Information Analysis",
+    "Topic :: Software Development",
+]
+packages = [ { include = "zeroNoteSamba" } ]
+
+[tool.poetry.dependencies]
+python = ">=3.9,<3.10"
+mypy = "*"
+black = "*"
+isort = "*"
+flake8 = "*"
+librosa = "^0.10.0.post2"
+numpy = "^1.25.1"
+torch = "^2.0.1"
+matplotlib = "^3.7.2"
+cython = "^0.29.36"
+pyyaml = "^6.0"
+jams = "^0.3.4"
+spleeter = "^2.4.0"
+tqdm = "^4.65.0"
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+
+[tool.mypy]
+strict = true
+
+[tool.black]
+line-length = 120
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

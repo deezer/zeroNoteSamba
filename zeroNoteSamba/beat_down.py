@@ -91,17 +91,7 @@ def train_model(wavs, inputs, masks, real_times, data_set, ymldict):
             for epoch in range(500):
                 print("\n-- Epoch {} --".format(epoch))
 
-                (
-                    model,
-                    optimizer,
-                    full_train_loss,
-                    train_f_measure,
-                    _,
-                    _,
-                    _,
-                    _,
-                    _,
-                ) = train_epoch(
+                (model, optimizer, full_train_loss, train_f_measure, _, _, _, _, _,) = train_epoch(
                     model,
                     criterion,
                     optimizer,
@@ -160,15 +150,7 @@ def train_model(wavs, inputs, masks, real_times, data_set, ymldict):
             state_dict = torch.load(mod_fp)
             test_mod.load_state_dict(state_dict)
 
-            (
-                full_test_loss,
-                test_f_measure,
-                test_cmlc,
-                test_cmlt,
-                test_amlc,
-                test_amlt,
-                test_info_gain,
-            ) = val_epoch(
+            (full_test_loss, test_f_measure, test_cmlc, test_cmlt, test_amlc, test_amlt, test_info_gain,) = val_epoch(
                 test_mod,
                 criterion,
                 _status,
@@ -197,9 +179,7 @@ def train_model(wavs, inputs, masks, real_times, data_set, ymldict):
             ig.append(test_info_gain)
 
             if jj == 0:
-                pathlib.Path("figures/{}/{}".format(data_set, _exp)).mkdir(
-                    parents=True, exist_ok=True
-                )
+                pathlib.Path("figures/{}/{}".format(data_set, _exp)).mkdir(parents=True, exist_ok=True)
 
             plt.figure()
             plt.plot(train_loss)
@@ -226,9 +206,7 @@ def train_model(wavs, inputs, masks, real_times, data_set, ymldict):
                 format="pdf",
             )
 
-        elif (
-            _status == "pretrained" or _status == "clmr" or _status == "vanilla"
-        ) and _pre == "validation":
+        elif (_status == "pretrained" or _status == "clmr" or _status == "vanilla") and _pre == "validation":
             model.eval()
 
             (
@@ -247,12 +225,8 @@ def train_model(wavs, inputs, masks, real_times, data_set, ymldict):
 
                     if _status == "pretrained":
                         vqt = inputs[wav]
-                        vqt1 = torch.reshape(
-                            vqt[0, :, :], (1, 1, vqt.shape[1], vqt.shape[2])
-                        ).cuda()
-                        vqt2 = torch.reshape(
-                            vqt[1, :, :], (1, 1, vqt.shape[1], vqt.shape[2])
-                        ).cuda()
+                        vqt1 = torch.reshape(vqt[0, :, :], (1, 1, vqt.shape[1], vqt.shape[2])).cuda()
+                        vqt2 = torch.reshape(vqt[1, :, :], (1, 1, vqt.shape[1], vqt.shape[2])).cuda()
 
                         msk = masks[wav]
                         msk = torch.reshape(msk, (1, msk.shape[0])).cuda()
@@ -263,9 +237,7 @@ def train_model(wavs, inputs, masks, real_times, data_set, ymldict):
 
                     else:
                         vqt = inputs[wav]
-                        vqt = torch.reshape(
-                            vqt[:, :], (1, 1, vqt.shape[0], vqt.shape[1])
-                        ).cuda()
+                        vqt = torch.reshape(vqt[:, :], (1, 1, vqt.shape[0], vqt.shape[1])).cuda()
 
                         msk = masks[wav]
                         msk = torch.reshape(msk, (1, msk.shape[0])).cuda()
@@ -288,50 +260,18 @@ def train_model(wavs, inputs, masks, real_times, data_set, ymldict):
                     test_info_gain.append(res[5])
 
             print("\n-- Full Set --")
-            print(
-                "Mean loss     is {:.3f} +- {:.3f}.".format(
-                    np.mean(full_test_loss), np.std(full_test_loss)
-                )
-            )
-            print(
-                "Mean F1-score is {:.3f} +- {:.3f}.".format(
-                    np.mean(test_f_measure), np.std(test_f_measure)
-                )
-            )
-            print(
-                "Mean CMLC     is {:.3f} +- {:.3f}.".format(
-                    np.mean(test_cmlc), np.std(test_cmlc)
-                )
-            )
-            print(
-                "Mean CMLT     is {:.3f} +- {:.3f}.".format(
-                    np.mean(test_cmlt), np.std(test_cmlt)
-                )
-            )
-            print(
-                "Mean AMLC     is {:.3f} +- {:.3f}.".format(
-                    np.mean(test_amlc), np.std(test_amlc)
-                )
-            )
-            print(
-                "Mean AMLT     is {:.3f} +- {:.3f}.".format(
-                    np.mean(test_amlt), np.std(test_amlt)
-                )
-            )
-            print(
-                "Mean InfoGain is {:.3f} +- {:.3f}.".format(
-                    np.mean(test_info_gain), np.std(test_info_gain)
-                )
-            )
+            print("Mean loss     is {:.3f} +- {:.3f}.".format(np.mean(full_test_loss), np.std(full_test_loss)))
+            print("Mean F1-score is {:.3f} +- {:.3f}.".format(np.mean(test_f_measure), np.std(test_f_measure)))
+            print("Mean CMLC     is {:.3f} +- {:.3f}.".format(np.mean(test_cmlc), np.std(test_cmlc)))
+            print("Mean CMLT     is {:.3f} +- {:.3f}.".format(np.mean(test_cmlt), np.std(test_cmlt)))
+            print("Mean AMLC     is {:.3f} +- {:.3f}.".format(np.mean(test_amlc), np.std(test_amlc)))
+            print("Mean AMLT     is {:.3f} +- {:.3f}.".format(np.mean(test_amlt), np.std(test_amlt)))
+            print("Mean InfoGain is {:.3f} +- {:.3f}.".format(np.mean(test_info_gain), np.std(test_info_gain)))
 
             break
 
         else:
-            raise ValueError(
-                "Problem with configuration file experiment arguments: {} and {}.".format(
-                    _status, _pre
-                )
-            )
+            raise ValueError("Problem with configuration file experiment arguments: {} and {}.".format(_status, _pre))
 
     if f1 != []:
         f1 = np.asarray(f1)

@@ -48,9 +48,7 @@ class NTXent(nn.Module):
             sim_num = sim_an_pos.exp()
 
             sim_an_png = self.CS(anchor, poss)
-            cos_an_neg += (sim_an_png.sum().item() - sim_an_png[xx].item()) / (
-                self.batch_len - 1
-            )
+            cos_an_neg += (sim_an_png.sum().item() - sim_an_png[xx].item()) / (self.batch_len - 1)
             sim_an_png = torch.div(sim_an_png, self.temperature)
             sim_den = sim_an_png.exp().sum()
 

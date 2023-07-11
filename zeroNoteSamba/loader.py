@@ -18,9 +18,7 @@ def load_models(_status, _pre, _lr):
     if _status == "pretrained":
         model = Down_CNN().cuda()
 
-        state_dict = torch.load(
-            "models/saved/shift_pret_cnn_16.pth", map_location=torch.device("cuda")
-        )
+        state_dict = torch.load("models/saved/shift_pret_cnn_16.pth", map_location=torch.device("cuda"))
 
         model.pretext.load_state_dict(state_dict)
 
@@ -38,16 +36,12 @@ def load_models(_status, _pre, _lr):
             )
 
         else:
-            optimizer = torch.optim.Adam(
-                model.parameters(), lr=0.5 * _lr * 10e-2, betas=(0.9, 0.999)
-            )
+            optimizer = torch.optim.Adam(model.parameters(), lr=0.5 * _lr * 10e-2, betas=(0.9, 0.999))
 
     elif _status == "clmr":
         model = DS_CNN().cuda()
 
-        state_dict = torch.load(
-            "models/saved/clmr_pret_cnn_16.pth", map_location=torch.device("cuda")
-        )
+        state_dict = torch.load("models/saved/clmr_pret_cnn_16.pth", map_location=torch.device("cuda"))
 
         model.load_state_dict(state_dict)
 
@@ -62,9 +56,7 @@ def load_models(_status, _pre, _lr):
             )
 
         else:
-            optimizer = torch.optim.Adam(
-                model.parameters(), lr=0.5 * _lr, betas=(0.9, 0.999)
-            )
+            optimizer = torch.optim.Adam(model.parameters(), lr=0.5 * _lr, betas=(0.9, 0.999))
 
     else:
         model = DS_CNN().cuda()

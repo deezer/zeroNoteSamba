@@ -13,9 +13,8 @@ import processing.stem_check as stem_check
 import processing.utilities as utils
 import soundfile as sf
 import yaml
-from tqdm import tqdm
-
 from spleeter.separator import Separator
+from tqdm import tqdm
 
 
 def gen_clmr(ymldict):
@@ -133,28 +132,17 @@ def full_fma_stem_check(separator, ymldict):
                     print("   {}".format("Failed"))
 
                 if rms_bool == True:
-                    Path("new_data/" + f.strip()[-10:-4]).mkdir(
-                        parents=True, exist_ok=True
-                    )
+                    Path("new_data/" + f.strip()[-10:-4]).mkdir(parents=True, exist_ok=True)
 
                     for key in stems:
                         stems[key] = utils.convert_to_mono(stems[key])
-                        stems[key] = audio_lib.resample(
-                            stems[key], sr, 16000, res_type="kaiser_fast"
-                        )
+                        stems[key] = audio_lib.resample(stems[key], sr, 16000, res_type="kaiser_fast")
                         sf.write(
                             "new_data/" + f.strip()[-10:-4] + "/" + key + ".wav",
                             stems[key],
                             16000,
                         )
-                        print(
-                            "   Saved "
-                            + "new_data/"
-                            + f.strip()[-10:-4]
-                            + "/"
-                            + key
-                            + ".wav"
-                        )
+                        print("   Saved " + "new_data/" + f.strip()[-10:-4] + "/" + key + ".wav")
 
     return
 

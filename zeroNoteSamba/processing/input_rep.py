@@ -64,9 +64,7 @@ def plot_XQT(cqt, sample_rate, title=None, save=None):
     """
     fig, ax = plt.subplots()
     dB = audio_lib.amplitude_to_db(cqt, ref=np.max)
-    img = display.specshow(
-        data=dB, sr=sample_rate, x_axis="time", y_axis="cqt_note", ax=ax
-    )
+    img = display.specshow(data=dB, sr=sample_rate, x_axis="time", y_axis="cqt_note", ax=ax)
 
     if title is not None:
         ax.set_title(title)

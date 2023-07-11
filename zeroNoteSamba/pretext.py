@@ -66,9 +66,7 @@ def drum_anchor_positive(stems, ymldict):
         temp_anchor = anchor[ran : ran + length * 16000]
         temp_possignal = possignal[ran : ran + length * 16000]
 
-        rms_bool = stem_check.check_CL_clips(
-            temp_anchor, temp_possignal, lower_p, upper_p
-        )
+        rms_bool = stem_check.check_CL_clips(temp_anchor, temp_possignal, lower_p, upper_p)
 
         idx += 1
 
@@ -216,9 +214,7 @@ def train_model(ymldict, saved=True):
                 print("Saving pkl files!")
 
                 if pt_task == "zerons":
-                    _, _, fps = create_memory_bank(
-                        val_len, ymldict, fps, "data/Validation/val_bank.pkl"
-                    )
+                    _, _, fps = create_memory_bank(val_len, ymldict, fps, "data/Validation/val_bank.pkl")
 
                     for xx in trange(10):
                         _, _, fps = create_memory_bank(
@@ -246,12 +242,8 @@ def train_model(ymldict, saved=True):
                     val_bank = np.zeros((6400, 2, 96, 626), dtype=np.float32)
 
                     for xx in trange(10):
-                        with open(
-                            "data/Train/train_bank_{}.pkl".format(xx), "rb"
-                        ) as handle:
-                            train_bank[
-                                xx * 2880 : xx * 2880 + 2880, :, :, :
-                            ] = pickle.load(handle)[:, :, :, :]
+                        with open("data/Train/train_bank_{}.pkl".format(xx), "rb") as handle:
+                            train_bank[xx * 2880 : xx * 2880 + 2880, :, :, :] = pickle.load(handle)[:, :, :, :]
 
                     with open("data/Validation/val_bank.pkl", "rb") as handle:
                         val_bank[:, :, :, :] = pickle.load(handle)[:, :, :, :]
@@ -261,9 +253,7 @@ def train_model(ymldict, saved=True):
 
                     for xx in trange(50):
                         with open("data/CLMR/clmr_pkl_{}".format(xx), "rb") as handle:
-                            bank[xx * 2048 : xx * 2048 + 2048, :, :, :] = pickle.load(
-                                handle
-                            )[:, :, :, :]
+                            bank[xx * 2048 : xx * 2048 + 2048, :, :, :] = pickle.load(handle)[:, :, :, :]
 
                     print("Creating datasets...")
                     np.random.shuffle(bank)
@@ -278,18 +268,14 @@ def train_model(ymldict, saved=True):
             np.random.shuffle(train_bank)
 
             if epoch == 0:
-                new_val_bank = np.zeros(
-                    (6400 * batch_len, 2, 96, 313), dtype=np.float32
-                )
+                new_val_bank = np.zeros((6400 * batch_len, 2, 96, 313), dtype=np.float32)
 
                 print("Creating new validation shifts...")
                 for xx in trange(6400):
                     randomlist = random.sample(range(0, 313), batch_len)
 
                     for ii, start_idx in enumerate(randomlist):
-                        new_val_bank[xx * batch_len + ii, :, :, :] = val_bank[
-                            xx, :, :, start_idx : start_idx + 313
-                        ]
+                        new_val_bank[xx * batch_len + ii, :, :, :] = val_bank[xx, :, :, start_idx : start_idx + 313]
 
         elif pt_task == "clmr":
             np.random.shuffle(train_bank)
@@ -306,9 +292,7 @@ def train_model(ymldict, saved=True):
 
         if pt_task == "zerons":
             for jj in range(20):
-                new_train_bank = np.zeros(
-                    (1440 * batch_len, 2, 96, 313), dtype=np.float32
-                )
+                new_train_bank = np.zeros((1440 * batch_len, 2, 96, 313), dtype=np.float32)
 
                 print("{} : Creating new training shifts...".format(jj))
                 for xx in trange(1440):
@@ -337,11 +321,7 @@ def train_model(ymldict, saved=True):
 
         elif pt_task == "clmr":
             for zz in range(20):
-                train_ds = TensorDataset(
-                    torch.tensor(
-                        train_bank[zz * 4096 : zz * 4096 + 4096, :, :, :]
-                    ).float()
-                )
+                train_ds = TensorDataset(torch.tensor(train_bank[zz * 4096 : zz * 4096 + 4096, :, :, :]).float())
                 train_loader = DataLoader(train_ds, batch_size=batch_len, shuffle=True)
 
                 # Train epoch
@@ -351,9 +331,7 @@ def train_model(ymldict, saved=True):
                     temp_train_loss,
                     temp_train_anpos,
                     temp_train_anneg,
-                ) = train_epoch(
-                    model, train_loader, criterion, optimizer, pt_task="clmr"
-                )
+                ) = train_epoch(model, train_loader, criterion, optimizer, pt_task="clmr")
 
                 full_train_loss += temp_train_loss
                 full_train_anpos += temp_train_anpos
@@ -371,33 +349,19 @@ def train_model(ymldict, saved=True):
         train_an_neg.append(full_train_anneg)
 
         print("\n!!! Mean training batch loss is {:.3f}.".format(full_train_loss))
-        print(
-            "!!! Mean training anchor / positive similiarity is {:.3f}.".format(
-                full_train_anpos
-            )
-        )
-        print(
-            "!!! Mean training anchor / negative similiarity is {:.3f}.".format(
-                full_train_anneg
-            )
-        )
+        print("!!! Mean training anchor / positive similiarity is {:.3f}.".format(full_train_anpos))
+        print("!!! Mean training anchor / negative similiarity is {:.3f}.".format(full_train_anneg))
 
         print("\n{} : Validating...".format(epoch))
 
         if pt_task == "zerons":
             for zz in trange(10):
                 val_ds = TensorDataset(
-                    torch.tensor(
-                        new_val_bank[
-                            640 * batch_len * zz : 640 * batch_len * (zz + 1), :, :, :
-                        ]
-                    ).float()
+                    torch.tensor(new_val_bank[640 * batch_len * zz : 640 * batch_len * (zz + 1), :, :, :]).float()
                 )
                 val_loader = DataLoader(val_ds, batch_size=batch_len, shuffle=False)
 
-                temp_val_loss, temp_val_anpos, temp_val_anneg = val_epoch(
-                    model, val_loader, criterion, optimizer
-                )
+                temp_val_loss, temp_val_anpos, temp_val_anneg = val_epoch(model, val_loader, criterion, optimizer)
 
                 full_val_loss += temp_val_loss
                 full_val_anpos += temp_val_anpos
@@ -405,11 +369,7 @@ def train_model(ymldict, saved=True):
 
         elif pt_task == "clmr":
             for hh in trange(10):
-                val_ds = TensorDataset(
-                    torch.tensor(
-                        val_bank[hh * 2048 : hh * 2048 + 2048, :, :, :]
-                    ).float()
-                )
+                val_ds = TensorDataset(torch.tensor(val_bank[hh * 2048 : hh * 2048 + 2048, :, :, :]).float())
                 val_loader = DataLoader(val_ds, batch_size=batch_len, shuffle=False)
 
                 temp_val_loss, temp_val_anpos, temp_val_anneg = val_epoch(
@@ -428,16 +388,8 @@ def train_model(ymldict, saved=True):
         full_val_anneg /= 10
 
         print("\n!!! Mean validation batch loss is {:.3f}.".format(full_val_loss))
-        print(
-            "!!! Mean validation anchor / positive similiarity is {:.3f}.".format(
-                full_val_anpos
-            )
-        )
-        print(
-            "!!! Mean validation anchor / negative similiarity is {:.3f}.".format(
-                full_val_anneg
-            )
-        )
+        print("!!! Mean validation anchor / positive similiarity is {:.3f}.".format(full_val_anpos))
+        print("!!! Mean validation anchor / negative similiarity is {:.3f}.".format(full_val_anneg))
 
         # Save model
         if full_val_loss < best_val_loss:
@@ -546,16 +498,8 @@ def train_epoch(model, train_loader, criterion, optimizer, pt_task="zerons"):
     full_train_anneg = full_train_anneg / (batch_idx + 1)
 
     print("*** Mean training batch loss is {:.3f}.".format(full_train_loss))
-    print(
-        "*** Mean training anchor / positive similiarity is {:.3f}.".format(
-            full_train_anpos
-        )
-    )
-    print(
-        "*** Mean training anchor / negative similiarity is {:.3f}.".format(
-            full_train_anneg
-        )
-    )
+    print("*** Mean training anchor / positive similiarity is {:.3f}.".format(full_train_anpos))
+    print("*** Mean training anchor / negative similiarity is {:.3f}.".format(full_train_anneg))
 
     return model, full_train_loss, full_train_anpos, full_train_anneg
 

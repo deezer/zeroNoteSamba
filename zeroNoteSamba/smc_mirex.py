@@ -13,7 +13,6 @@ import processing.source_separation as source_separation
 import processing.utilities as utils
 import torch
 import yaml
-
 from spleeter.separator import Separator
 
 if __name__ == "__main__":
@@ -72,13 +71,9 @@ if __name__ == "__main__":
             print("{} :: {}".format(audio, beats))
 
             if smc_status == "pretrained":
-                temp_sig = utils.convert_to_xxhz(
-                    "SMC_MIREX/SMC_MIREX_Audio/" + audio, 44100
-                )
+                temp_sig = utils.convert_to_xxhz("SMC_MIREX/SMC_MIREX_Audio/" + audio, 44100)
 
-                temp_stems = source_separation.wv_run_spleeter(
-                    temp_sig, 44100, separator, model
-                )
+                temp_stems = source_separation.wv_run_spleeter(temp_sig, 44100, separator, model)
 
                 anchor = None
                 for name, sig in temp_stems.items():

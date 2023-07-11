@@ -14,7 +14,6 @@ import processing.source_separation as source_separation
 import processing.utilities as utils
 import torch
 import yaml
-
 from spleeter.separator import Separator
 
 if __name__ == "__main__":
@@ -63,9 +62,7 @@ if __name__ == "__main__":
 
                         print("{} :: {} -- {}".format(idx, fp, len(sig)))
 
-                        temp_stems = source_separation.wv_run_spleeter(
-                            sig, 44100, separator, model
-                        )
+                        temp_stems = source_separation.wv_run_spleeter(sig, 44100, separator, model)
 
                         anchor = None
                         for name, sig in temp_stems.items():
@@ -96,18 +93,12 @@ if __name__ == "__main__":
                             VQT1 = IR.generate_XQT(signals[fp][:, 0], 16000, "vqt")
                             VQT2 = IR.generate_XQT(signals[fp][:, 1], 16000, "vqt")
 
-                            VQT = np.zeros(
-                                (2, VQT1.shape[0], VQT1.shape[1]), dtype=float
-                            )
+                            VQT = np.zeros((2, VQT1.shape[0], VQT1.shape[1]), dtype=float)
                             VQT[0, :, :] = VQT1[:, :]
                             VQT[1, :, :] = VQT2[:, :]
 
                             vqts = {}
-                            print(
-                                "VQT shape: ({} * {})".format(
-                                    VQT.shape[1], VQT.shape[2]
-                                )
-                            )
+                            print("VQT shape: ({} * {})".format(VQT.shape[1], VQT.shape[2]))
                             vqts[fp] = torch.from_numpy(VQT).float()
                             d_pulse = torch.zeros(VQT.shape[2])
                             b_pulse = torch.zeros(VQT.shape[2])
@@ -120,11 +111,7 @@ if __name__ == "__main__":
                             VQT[0, :, :] = VQT1[:, :]
                             VQT[1, :, :] = VQT2[:, :]
 
-                            print(
-                                "VQT shape: ({} * {})".format(
-                                    VQT.shape[1], VQT.shape[2]
-                                )
-                            )
+                            print("VQT shape: ({} * {})".format(VQT.shape[1], VQT.shape[2]))
                             vqts[fp] = torch.from_numpy(VQT).float()
                             d_pulse = torch.zeros(VQT.shape[2])
                             b_pulse = torch.zeros(VQT.shape[2])
@@ -139,22 +126,14 @@ if __name__ == "__main__":
                         if idx == 0:
                             VQT = IR.generate_XQT(signals[fp], 16000, "vqt")
                             vqts = {}
-                            print(
-                                "VQT shape: ({} * {})".format(
-                                    VQT.shape[0], VQT.shape[1]
-                                )
-                            )
+                            print("VQT shape: ({} * {})".format(VQT.shape[0], VQT.shape[1]))
                             vqts[fp] = torch.from_numpy(VQT).float()
                             d_pulse = torch.zeros(VQT.shape[1])
                             b_pulse = torch.zeros(VQT.shape[1])
 
                         else:
                             VQT = IR.generate_XQT(signals[fp], 16000, "vqt")
-                            print(
-                                "VQT shape: ({} * {})".format(
-                                    VQT.shape[0], VQT.shape[1]
-                                )
-                            )
+                            print("VQT shape: ({} * {})".format(VQT.shape[0], VQT.shape[1]))
                             vqts[fp] = torch.from_numpy(VQT).float()
                             d_pulse = torch.zeros(VQT.shape[1])
                             b_pulse = torch.zeros(VQT.shape[1])
