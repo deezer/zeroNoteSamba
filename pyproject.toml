@@ -31,10 +31,6 @@ packages = [ { include = "zeroNoteSamba" } ]
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.10"
-mypy = "*"
-black = "*"
-isort = "*"
-flake8 = "*"
 librosa = "^0.10.0.post2"
 numpy = "^1.25.1"
 torch = "^2.0.1"
@@ -44,6 +40,17 @@ pyyaml = "^6.0"
 jams = "^0.3.4"
 spleeter = "^2.4.0"
 tqdm = "^4.65.0"
+
+[tool.poetry.dev-dependencies]
+mypy = "*"
+black = "*"
+isort = "*"
+flake8 = "*"
+pandas-stubs = "^2.0.2.230605"
+antropy = "^0.1.5"
+types-openpyxl = "^3.1.0.13"
+types-pyyaml = "^6.0.12.10"
+types-tqdm = "^4.65.0.1"
 
 [tool.isort]
 profile = "black"
