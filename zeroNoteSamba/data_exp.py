@@ -2,10 +2,11 @@ import random
 
 import numpy as np
 import torch
-from epochs import train_epoch, val_epoch
-from loader import load_models
-from models.models import DS_CNN, Down_CNN
 from tqdm import trange
+
+from zeroNoteSamba.epochs import train_epoch, val_epoch
+from zeroNoteSamba.loader import load_models
+from zeroNoteSamba.models.models import DS_CNN, Down_CNN
 
 
 def train_model(wavs, vqts, beat_pulse, real_beat_times, data_set, ymldict):

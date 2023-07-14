@@ -1,5 +1,6 @@
 import torch
-from processing.evaluate import beat_tracking as eval
+
+from zeroNoteSamba.processing.evaluate import beat_tracking as eval
 
 
 def train_epoch(

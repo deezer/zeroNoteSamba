@@ -5,16 +5,15 @@ from pathlib import Path
 
 import librosa as audio_lib
 import numpy as np
-import processing.input_rep as input_rep
-import processing.source_separation as source_separation
-import processing.stem_check as stem_check
-
-# File imports
-import processing.utilities as utils
-import soundfile as sf
+import soundfile as sf  # type: ignore
 import yaml
 from spleeter.separator import Separator
 from tqdm import tqdm
+
+import zeroNoteSamba.processing.input_rep as input_rep
+import zeroNoteSamba.processing.source_separation as source_separation
+import zeroNoteSamba.processing.stem_check as stem_check
+import zeroNoteSamba.processing.utilities as utils
 
 
 def gen_clmr(ymldict):

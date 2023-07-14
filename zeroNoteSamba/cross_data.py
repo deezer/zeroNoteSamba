@@ -4,9 +4,10 @@ import random
 import numpy as np
 import torch
 import yaml
-from epochs import train_epoch, val_epoch
-from loader import load_models
-from models.models import DS_CNN, Down_CNN
+
+from zeroNoteSamba.epochs import train_epoch, val_epoch
+from zeroNoteSamba.loader import load_models
+from zeroNoteSamba.models.models import DS_CNN, Down_CNN
 
 
 def train_model(

@@ -5,19 +5,18 @@ import shutil
 from random import randint
 
 import librosa as audio_lib
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt  # type: ignore
 import numpy as np
-import processing.input_rep as input_rep
-
-# File imports
-import processing.stem_check as stem_check
 import torch
 import yaml
-from fma_loader import gen_clmr
-from models.loss_functions import NTXent
-from models.models import DS_CNN, Pretext_CNN
 from torch.utils.data import DataLoader, TensorDataset
 from tqdm import tqdm, trange
+
+import zeroNoteSamba.processing.input_rep as input_rep
+import zeroNoteSamba.processing.stem_check as stem_check
+from zeroNoteSamba.fma_loader import gen_clmr
+from zeroNoteSamba.models.loss_functions import NTXent
+from zeroNoteSamba.models.models import DS_CNN, Pretext_CNN
 
 device0 = torch.device("cuda:0")
 device1 = torch.device("cuda:1")

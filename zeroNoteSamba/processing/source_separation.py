@@ -1,4 +1,11 @@
-def wv_run_spleeter(y, sr, separator, model):
+from typing import Any, Dict
+
+import numpy as np
+import numpy.typing as npt
+from spleeter.separator import Separator
+
+
+def wv_run_spleeter(y: npt.NDArray[np.float32], sr: int, separator: Separator, model: str) -> Dict[Any, Any]:
     """
     Run Spleeter on a waveform file. Spleeter stems saved.
     -- y: input as np array
@@ -22,4 +29,4 @@ def wv_run_spleeter(y, sr, separator, model):
         return prediction
 
     else:
-        raise ("Model chosen is not one of 2stems, 4stems, and 5stems.")
+        raise Exception("Model chosen is not one of 2stems, 4stems, and 5stems.")

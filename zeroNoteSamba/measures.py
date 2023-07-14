@@ -4,25 +4,26 @@ import pickle
 import random
 from pathlib import Path
 
-import antropy
+import antropy  # type: ignore
 import librosa
 import numpy as np
 import pandas as pd
-import processing.input_rep as IR
-import processing.utilities as utils
-import soundfile as sf
+import soundfile as sf  # type: ignore
 import torch
 import yaml
-from madmom.features.beats import RNNBeatProcessor
-from models.loss_functions import NTXent
-from models.models import DS_CNN, Down_CNN
+from madmom.features.beats import RNNBeatProcessor  # type: ignore
 from openpyxl import load_workbook
-from pretext import val_epoch
-from processing.source_separation import wv_run_spleeter
-from scipy.stats import kurtosis
+from scipy.stats import kurtosis  # type: ignore
 from spleeter.separator import Separator
 from torch.utils.data import DataLoader, TensorDataset
 from tqdm import trange
+
+import zeroNoteSamba.processing.input_rep as IR
+import zeroNoteSamba.processing.utilities as utils
+from zeroNoteSamba.models.loss_functions import NTXent
+from zeroNoteSamba.models.models import DS_CNN, Down_CNN
+from zeroNoteSamba.pretext import val_epoch
+from zeroNoteSamba.processing.source_separation import wv_run_spleeter
 
 proc = RNNBeatProcessor()
 

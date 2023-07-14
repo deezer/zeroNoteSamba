@@ -1,19 +1,18 @@
 import os
 import pickle
 
-import beat_down as BD
-import data_exp as DE
 import librosa as audio_lib
 import numpy as np
-import old_school as DP
-import processing.input_rep as IR
-import processing.source_separation as source_separation
-
-# File imports
-import processing.utilities as utils
 import torch
 import yaml
 from spleeter.separator import Separator
+
+import zeroNoteSamba.beat_down as BD
+import zeroNoteSamba.data_exp as DE
+import zeroNoteSamba.old_school as DP
+import zeroNoteSamba.processing.input_rep as IR
+import zeroNoteSamba.processing.source_separation as source_separation
+import zeroNoteSamba.processing.utilities as utils
 
 if __name__ == "__main__":
     save = True

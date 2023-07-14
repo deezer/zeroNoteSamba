@@ -1,14 +1,15 @@
 import pathlib
 import random
 
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt  # type: ignore
 import numpy as np
 import torch
-from epochs import train_epoch, val_epoch
-from loader import load_models
-from models.models import DS_CNN, Down_CNN
-from processing.evaluate import beat_tracking as eval
 from tqdm import tqdm
+
+from zeroNoteSamba.epochs import train_epoch, val_epoch
+from zeroNoteSamba.loader import load_models
+from zeroNoteSamba.models.models import DS_CNN, Down_CNN
+from zeroNoteSamba.processing.evaluate import beat_tracking as eval
 
 
 def train_model(wavs, inputs, masks, real_times, data_set, ymldict):

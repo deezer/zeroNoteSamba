@@ -1,8 +1,11 @@
+from typing import Tuple
+
 import torch
-from models.models import DS_CNN, Down_CNN
+
+from zeroNoteSamba.models.models import DS_CNN, Down_CNN
 
 
-def load_models(_status, _pre, _lr):
+def load_models(_status: str, _pre: str, _lr: int) -> Tuple[torch.nn.BCELoss, torch.optim.Adam, torch.nn.Module]:
     """
     Function for loading loss, optimizer, and model.
     -- _status: pretrained, vanilla, clmr, or samplecnn?
@@ -11,6 +14,7 @@ def load_models(_status, _pre, _lr):
     """
     # Set loss function
     criterion = torch.nn.BCELoss().cuda()
+    model: torch.nn.Module
 
     print("\n{} learning mode...".format(_status))
 

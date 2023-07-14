@@ -1,10 +1,12 @@
+from typing import Any, Dict, List
+
 import librosa
-import mir_eval
+import mir_eval  # type: ignore
 import numpy as np
 from tqdm import tqdm
 
 
-def dp_ellis(wavs, signals, real_times):
+def dp_ellis(wavs: List[str], signals: Dict[str, Any], real_times: Dict[str, Any]) -> None:
     """
     Function for running librosa's algorithm for beat tracking.
     -- wavs: list of files
