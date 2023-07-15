@@ -85,23 +85,26 @@ if __name__ == "__main__":
                 anchor = None
                 for name, sig in temp_stems.items():
                     if name == "drums":
-                        possignal = np.zeros(sig.shape)
+                        possignal = np.zeros(sig.shape, dtype=np.float32)
                         possignal[:, :] = sig[:, :]
 
                     else:
                         if anchor is None:
-                            anchor = np.zeros(sig.shape)
+                            anchor = np.zeros(sig.shape, dtype=np.float32)
                             anchor[:, :] = sig[:, :]
 
                         else:
                             anchor[:, :] += sig[:, :]
 
-                anchor = utils.convert_to_mono(anchor)
-                anchor = audio_lib.resample(anchor, 44100, 16000)
-                possignal = utils.convert_to_mono(possignal)
-                possignal = audio_lib.resample(possignal, 44100, 16000)
+                if anchor is None:
+                    raise Exception("Anchor is still None.")
 
-                sigs = np.zeros((anchor.shape[0], 2))
+                anchor = utils.convert_to_mono(anchor)
+                anchor = audio_lib.resample(y=anchor, orig_sr=44100, target_sr=16000)
+                possignal = utils.convert_to_mono(possignal)
+                possignal = audio_lib.resample(y=possignal, orig_sr=44100, target_sr=16000)
+
+                sigs = np.zeros((anchor.shape[0], 2), dtype=np.float32)
                 sigs[:, 0] = anchor[:]
                 sigs[:, 1] = possignal[:]
 
@@ -157,16 +160,16 @@ if __name__ == "__main__":
                     b_pulse = torch.zeros(VQT.shape[1])
 
             beat = beats[idx]
-            down = downs[idx]
+            doww = downs[idx]
 
-            beat = np.asarray(beat.split(","), dtype=float)
-            down = np.asarray(down.split(","), dtype=int)
+            beat_str = np.asarray(beat.split(","), dtype=float)
+            down_str = np.asarray(doww.split(","), dtype=int)
 
             beat_tmz = []
             down_tmz = []
 
-            for xx in range(len(beat)):
-                b = beat[xx] / 44100
+            for xx in range(len(beat_str)):
+                b = beat_str[xx] / 44100
                 d = xx + 1
 
                 beat_tmz.append(b)
@@ -178,7 +181,7 @@ if __name__ == "__main__":
                 if temp == 0:
                     temp = 1
 
-                if d in down:
+                if str(d) in doww:
                     down_tmz.append(b)
                     d_pulse[temp] = 1
                     d_pulse[temp - 1] = 0.5

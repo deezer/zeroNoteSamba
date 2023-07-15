@@ -1,9 +1,11 @@
 import pickle
 import random
+from typing import Any, Dict, List, SupportsFloat, Union
 
 import numpy as np
 import torch
 import yaml
+from typing_extensions import Buffer, SupportsIndex
 
 from zeroNoteSamba.epochs import train_epoch, val_epoch
 from zeroNoteSamba.loader import load_models
@@ -11,16 +13,16 @@ from zeroNoteSamba.models.models import DS_CNN, Down_CNN
 
 
 def train_model(
-    train_wavs,
-    train_vqts,
-    train_masks,
-    train_real_times,
-    test_wavs,
-    test_vqts,
-    test_masks,
-    test_real_times,
-    ymldict,
-):
+    train_wavs: List[str],
+    train_vqts: Dict[str, Any],
+    train_masks: Dict[str, Any],
+    train_real_times: Dict[str, Any],
+    test_wavs: List[str],
+    test_vqts: Dict[str, Any],
+    test_masks: Dict[str, Any],
+    test_real_times: Dict[str, Any],
+    ymldict: Dict[str, Union[SupportsFloat, SupportsIndex, str, Buffer]],
+) -> torch.nn.Module:
     """
     Function for training model on Hainsworth data set.
     -- train_wavs: list of training wav files (dictionary keys)
@@ -34,10 +36,10 @@ def train_model(
     -- ymldict: YAML parameters
     """
     # Load the Hainsworth stuff:
-    _status = ymldict.get("cross_status")
-    _pre = ymldict.get("cross_pre")
+    _status = str(ymldict.get("cross_status"))
+    _pre = str(ymldict.get("cross_pre"))
     _train_set = ymldict.get("cross_train_set")
-    _lr = ymldict.get("cross_lr")
+    _lr = float(ymldict.get("cross_lr", ""))
     _eval = ymldict.get("cross_eval")
 
     threshold = False
@@ -81,7 +83,7 @@ def train_model(
         val_loss = []
         train_f1 = []
         val_f1 = []
-        train_indices = []
+        train_indices: List[str] = []
 
         for ii in range(8):
             if ii != jj:
@@ -148,6 +150,8 @@ def train_model(
 
         mod_fp = "models/saved/cross_{}_{}.pth".format(_train_set, _status)
 
+        test_mod: torch.nn.Module
+
         if _status == "pretrained":
             test_mod = Down_CNN().cuda()
         else:
@@ -184,20 +188,20 @@ def train_model(
         amlt.append(test_amlt)
         ig.append(test_info_gain)
 
-    f1 = np.asarray(f1)
-    cmlc = np.asarray(cmlc)
-    cmlt = np.asarray(cmlt)
-    amlc = np.asarray(amlc)
-    amlt = np.asarray(amlt)
-    ig = np.asarray(ig)
+    f1_arr = np.asarray(f1)
+    cmlc_arr = np.asarray(cmlc)
+    cmlt_arr = np.asarray(cmlt)
+    amlc_arr = np.asarray(amlc)
+    amlt_arr = np.asarray(amlt)
+    ig_arr = np.asarray(ig)
 
-    print("\n8-fold CV results:")
-    print("\nBeat F1-score is {:.3f} +- {:.3f}.".format(np.mean(f1), np.std(f1)))
-    print("Beat CMLC     is {:.3f} +- {:.3f}.".format(np.mean(cmlc), np.std(cmlc)))
-    print("Beat CMLT     is {:.3f} +- {:.3f}.".format(np.mean(cmlt), np.std(cmlt)))
-    print("Beat AMLC     is {:.3f} +- {:.3f}.".format(np.mean(amlc), np.std(amlc)))
-    print("Beat AMLT     is {:.3f} +- {:.3f}.".format(np.mean(amlt), np.std(amlt)))
-    print("Beat InfoGain is {:.3f} +- {:.3f}.".format(np.mean(ig), np.std(ig)))
+    print("\n-- 8-fold CV results --")
+    print("\nBeat F1-score is {:.3f} +- {:.3f}.".format(np.mean(f1_arr), np.std(f1_arr)))
+    print("Beat CMLC     is {:.3f} +- {:.3f}.".format(np.mean(cmlc_arr), np.std(cmlc_arr)))
+    print("Beat CMLT     is {:.3f} +- {:.3f}.".format(np.mean(cmlt_arr), np.std(cmlt_arr)))
+    print("Beat AMLC     is {:.3f} +- {:.3f}.".format(np.mean(amlc_arr), np.std(amlc_arr)))
+    print("Beat AMLT     is {:.3f} +- {:.3f}.".format(np.mean(amlt_arr), np.std(amlt_arr)))
+    print("Beat InfoGain is {:.3f} +- {:.3f}.".format(np.mean(ig_arr), np.std(ig_arr)))
 
     return model
 

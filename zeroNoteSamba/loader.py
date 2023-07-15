@@ -5,7 +5,7 @@ import torch
 from zeroNoteSamba.models.models import DS_CNN, Down_CNN
 
 
-def load_models(_status: str, _pre: str, _lr: int) -> Tuple[torch.nn.BCELoss, torch.optim.Adam, torch.nn.Module]:
+def load_models(_status: str, _pre: str, _lr: float) -> Tuple[torch.nn.BCELoss, torch.optim.Adam, torch.nn.Module]:
     """
     Function for loading loss, optimizer, and model.
     -- _status: pretrained, vanilla, clmr, or samplecnn?

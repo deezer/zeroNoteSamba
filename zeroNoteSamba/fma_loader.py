@@ -2,9 +2,11 @@ import os
 import pickle
 import random
 from pathlib import Path
+from typing import Any, Dict, Tuple
 
 import librosa as audio_lib
 import numpy as np
+import numpy.typing as npt
 import soundfile as sf  # type: ignore
 import yaml
 from spleeter.separator import Separator
@@ -16,13 +18,13 @@ import zeroNoteSamba.processing.stem_check as stem_check
 import zeroNoteSamba.processing.utilities as utils
 
 
-def gen_clmr(ymldict):
+def gen_clmr(ymldict: Dict[str, Any]) -> None:
     """
     Generate CLMR examples.
     -- ymldict: dictionary with yaml parameters
     """
     # Load desired variables
-    fma_dir = ymldict.get("pt_data_dir")
+    fma_dir = ymldict.get("pt_data_dir", "")
 
     # Iterate through FMA directory and create csv files with good files
     dir_list = os.listdir(fma_dir)
@@ -86,15 +88,15 @@ def gen_clmr(ymldict):
     return
 
 
-def full_fma_stem_check(separator, ymldict):
+def full_fma_stem_check(separator: Separator, ymldict: Dict[str, Any]) -> None:
     """
     Function that writes csv files with good stem files.
     -- separator: Spleeter separator
     -- ymldict: dictionary with yaml parameters
     """
     # Load desired variables
-    fma_dir = ymldict.get("pt_data_dir")
-    sr = ymldict.get("sample_rate")
+    fma_dir = ymldict.get("pt_data_dir", "")
+    sr = ymldict.get("sample_rate", -1)
 
     # Iterate through FMA directory and create csv files with good files
     dir_list = os.listdir(fma_dir)
@@ -135,7 +137,9 @@ def full_fma_stem_check(separator, ymldict):
 
                     for key in stems:
                         stems[key] = utils.convert_to_mono(stems[key])
-                        stems[key] = audio_lib.resample(stems[key], sr, 16000, res_type="kaiser_fast")
+                        stems[key] = audio_lib.resample(
+                            y=stems[key], orig_sr=sr, target_sr=16000, res_type="kaiser_fast"
+                        )
                         sf.write(
                             "new_data/" + f.strip()[-10:-4] + "/" + key + ".wav",
                             stems[key],
@@ -146,7 +150,9 @@ def full_fma_stem_check(separator, ymldict):
     return
 
 
-def drum_load(filename, separator, sr, ymldict):
+def drum_load(
+    filename: str, separator: Separator, sr: int, ymldict: Dict[str, Any]
+) -> Tuple[npt.NDArray[np.float32], Dict[Any, Any], bool]:
     """
     We run Spleeter on the input file.
     Return RMS status, full signal, and stems.
@@ -155,7 +161,7 @@ def drum_load(filename, separator, sr, ymldict):
     -- sr: sample rate
     -- ymldict: dictionary with yaml parameters
     """
-    spl_mod = ymldict.get("spl_mod")
+    spl_mod = ymldict.get("spl_mod", "")
 
     # Create new 16000 Hz file
     yy = utils.convert_to_xxhz(filename, sr)

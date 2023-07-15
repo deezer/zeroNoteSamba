@@ -1,15 +1,24 @@
 import random
+from typing import Any, Dict, List, SupportsFloat, Union
 
 import numpy as np
 import torch
 from tqdm import trange
+from typing_extensions import Buffer, SupportsIndex
 
 from zeroNoteSamba.epochs import train_epoch, val_epoch
 from zeroNoteSamba.loader import load_models
 from zeroNoteSamba.models.models import DS_CNN, Down_CNN
 
 
-def train_model(wavs, vqts, beat_pulse, real_beat_times, data_set, ymldict):
+def train_model(
+    wavs: List[str],
+    vqts: Dict[str, Any],
+    beat_pulse: Dict[str, Any],
+    real_beat_times: Dict[str, Any],
+    data_set: str,
+    ymldict: Dict[str, Union[SupportsFloat, SupportsIndex, str, Buffer]],
+) -> torch.nn.Module:
     """
     Function for training model on GTZAN data set.
     -- wavs: list of wav files (dictionary keys)
@@ -20,10 +29,10 @@ def train_model(wavs, vqts, beat_pulse, real_beat_times, data_set, ymldict):
     -- ymldict: YAML parameters
     """
     # Load the experiment stuff:
-    _status = ymldict.get("{}_status".format(data_set))
-    _pre = ymldict.get("{}_pre".format(data_set))
+    _status = str(ymldict.get("{}_status".format(data_set)))
+    _pre = str(ymldict.get("{}_pre".format(data_set)))
     _exp = ymldict.get("{}_exp".format(data_set))
-    _lr = ymldict.get("{}_lr".format(data_set))
+    _lr = float(ymldict.get("{}_lr".format(data_set), ""))
     _eval = ymldict.get("{}_eval".format(data_set))
 
     threshold = False
@@ -120,6 +129,7 @@ def train_model(wavs, vqts, beat_pulse, real_beat_times, data_set, ymldict):
 
             mod_fp = "models/saved/{}_{}_{}.pth".format(data_set, _exp, _status)
 
+            test_mod: torch.nn.Module
             if _status == "pretrained":
                 test_mod = Down_CNN().cuda()
             else:
@@ -151,19 +161,19 @@ def train_model(wavs, vqts, beat_pulse, real_beat_times, data_set, ymldict):
             amlt.append(test_amlt)
             ig.append(test_info_gain)
 
-        f1 = np.asarray(f1)
-        cmlc = np.asarray(cmlc)
-        cmlt = np.asarray(cmlt)
-        amlc = np.asarray(amlc)
-        amlt = np.asarray(amlt)
-        ig = np.asarray(ig)
+        f1_arr = np.asarray(f1)
+        cmlc_arr = np.asarray(cmlc)
+        cmlt_arr = np.asarray(cmlt)
+        amlc_arr = np.asarray(amlc)
+        amlt_arr = np.asarray(amlt)
+        ig_arr = np.asarray(ig)
 
         print("\n-- 8-fold CV results --")
-        print("\nBeat F1-score is {:.3f} +- {:.3f}.".format(np.mean(f1), np.std(f1)))
-        print("Beat CMLC     is {:.3f} +- {:.3f}.".format(np.mean(cmlc), np.std(cmlc)))
-        print("Beat CMLT     is {:.3f} +- {:.3f}.".format(np.mean(cmlt), np.std(cmlt)))
-        print("Beat AMLC     is {:.3f} +- {:.3f}.".format(np.mean(amlc), np.std(amlc)))
-        print("Beat AMLT     is {:.3f} +- {:.3f}.".format(np.mean(amlt), np.std(amlt)))
-        print("Beat InfoGain is {:.3f} +- {:.3f}.".format(np.mean(ig), np.std(ig)))
+        print("\nBeat F1-score is {:.3f} +- {:.3f}.".format(np.mean(f1_arr), np.std(f1_arr)))
+        print("Beat CMLC     is {:.3f} +- {:.3f}.".format(np.mean(cmlc_arr), np.std(cmlc_arr)))
+        print("Beat CMLT     is {:.3f} +- {:.3f}.".format(np.mean(cmlt_arr), np.std(cmlt_arr)))
+        print("Beat AMLC     is {:.3f} +- {:.3f}.".format(np.mean(amlc_arr), np.std(amlc_arr)))
+        print("Beat AMLT     is {:.3f} +- {:.3f}.".format(np.mean(amlt_arr), np.std(amlt_arr)))
+        print("Beat InfoGain is {:.3f} +- {:.3f}.".format(np.mean(ig_arr), np.std(ig_arr)))
 
     return model

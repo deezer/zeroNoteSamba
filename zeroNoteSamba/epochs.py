@@ -1,20 +1,22 @@
+from typing import Any, Dict, List, Tuple
+
 import torch
 
 from zeroNoteSamba.processing.evaluate import beat_tracking as eval
 
 
 def train_epoch(
-    model,
-    criterion,
-    optimizer,
-    _status,
-    indices,
-    real_times,
-    inputs,
-    masks,
-    threshold,
-    librosa,
-):
+    model: torch.nn.Module,
+    criterion: torch.nn.BCELoss,
+    optimizer: torch.optim.Adam,
+    _status: str,
+    indices: List[str],
+    real_times: Dict[str, Any],
+    inputs: Dict[str, Any],
+    masks: Dict[str, Any],
+    threshold: bool,
+    librosa: bool,
+) -> Tuple[torch.nn.Module, torch.optim.Adam, float, float, float, float, float, float, float]:
     """
     Training epoch.
     -- model: model to train
@@ -99,7 +101,17 @@ def train_epoch(
     return model, optimizer, full_loss, f_measure, cmlc, cmlt, amlc, amlt, info_gain
 
 
-def val_epoch(model, criterion, _status, indices, real_times, inputs, masks, threshold, librosa):
+def val_epoch(
+    model: torch.nn.Module,
+    criterion: torch.nn.BCELoss,
+    _status: str,
+    indices: List[str],
+    real_times: Dict[str, Any],
+    inputs: Dict[str, Any],
+    masks: Dict[str, Any],
+    threshold: bool,
+    librosa: bool,
+) -> Tuple[float, float, float, float, float, float, float]:
     """
     Validation epoch.
     -- model: model to train
