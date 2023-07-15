@@ -8,7 +8,7 @@ by [Dorian Desblancs](https://www.linkedin.com/in/dorian-desblancs), [Vincent Lo
 
 ## About
 
-This repository contains the code used to generate the ZeroNS results. All experiment settings can be found in the `configuration/config.yaml` file. These include learning rates and evaluation modes for each downstream dataset, for example. For the pretext task, one can change the batch size and temperature parameters among other elements.
+This repository contains the code used to generate the ZeroNS results. All experiment settings can be found in the `zeroNoteSamba/configuration/config.yaml` file. These include learning rates and evaluation modes for each downstream dataset, for example. For the pretext task, one can change the batch size and temperature parameters among other elements.
 
 ## Getting Started
 
@@ -19,10 +19,11 @@ git clone https://github.com/deezer/zeroNoteSamba.git
 cd zeroNoteSamba
 
 # Install dependencies
-pip install -r requirements.txt
+pip install poetry
+poetry install
 
 # Unzip model weights file
-gzip -d models/saved/shift_pret_cnn_16.pth.gz
+gzip -d zeroNoteSamba/models/saved/shift_pret_cnn_16.pth.gz
 
 # Download sample audio example
 wget https://github.com/deezer/spleeter/raw/master/audio_example.mp3
@@ -35,8 +36,8 @@ One can then get started with the following Python code snippet in order to expl
 # Import functions and packages
 import torch
 import librosa
-import processing.input_rep as IR
-from models.models import Down_CNN
+import zeroNoteSamba.processing.input_rep as IR
+from zeroNoteSamba.models.models import Down_CNN
 from spleeter.separator import Separator
 
 # Run Spleeter and create percussive and non-percussive tracks
@@ -50,8 +51,8 @@ other = (stems['other'][:, 0] + stems['other'][:, 1] \
         + stems['vocals'][:, 0] + stems['vocals'][:, 1] \
         + stems['bass'][:, 0] + stems['bass'][:, 1] ) / 2
 
-drums = librosa.resample(drums, 44100, 16000)
-other = librosa.resample(other, 44100, 16000)
+drums = librosa.resample(y=drums, orig_sr=44100, target_sr=16000)
+other = librosa.resample(y=other, orig_sr=44100, target_sr=16000)
 
 # Generate VQTs
 vqt_postve = torch.from_numpy(IR.generate_XQT(drums, 16000, 'vqt'))
@@ -63,7 +64,7 @@ vqt_anchor = vqt_anchor.reshape(1, 1, vqt_anchor.shape[0], vqt_anchor.shape[1])
 # Load pretext task model weights
 device = torch.device('cpu')
 model = Down_CNN()
-state_dict = torch.load("models/saved/shift_pret_cnn_16.pth", map_location=device)
+state_dict = torch.load("zeroNoteSamba/models/saved/shift_pret_cnn_16.pth", map_location=device)
 model.pretext.load_state_dict(state_dict)
 model.eval()
 
@@ -94,12 +95,12 @@ The above script and code for plotting the embeddings can be found by running th
 
 ## Advanced Usage
 
-The pretext task code can be found in `pretext.py` and `fma_loader.py`. All dataset processing for beat-tracking-related tasks can be found in `ballroom.py`, `gtzan.py`, `hainsworth.py`, and `smc_mirex.py`. All downstream tasks can be found in the following:
-- beat tracking: `beat_down.py`.
-- cross-dataset generalization: `cross_data.py`.
-- few-shot beat tracking: `data_exp.py`.
+The pretext task code can be found in `zeroNoteSamba/pretext.py` and `zeroNoteSamba/fma_loader.py`. All dataset processing for beat-tracking-related tasks can be found in `zeroNoteSamba/ballroom.py`, `zeroNoteSamba/gtzan.py`, `zeroNoteSamba/hainsworth.py`, and `zeroNoteSamba/smc_mirex.py`. All downstream tasks can be found in the following:
+- beat tracking: `zeroNoteSamba/beat_down.py`.
+- cross-dataset generalization: `zeroNoteSamba/cross_data.py`.
+- few-shot beat tracking: `zeroNoteSamba/data_exp.py`.
 
-The code to generate the information-theoretic measures of ZeroNS network embeddings can be found in `measures.py` and librosa's beat tracking method is in `old_school.py`. Finally, one can find the model and processing code in `models/` and `processing/`.
+The code to generate the information-theoretic measures of ZeroNS network embeddings can be found in `zeroNoteSamba/measures.py` and librosa's beat tracking method is in `zeroNoteSamba/old_school.py`. Finally, one can find the model and processing code in `zeroNoteSamba/models/` and `zeroNoteSamba/processing/`.
 
 ## Reference
 

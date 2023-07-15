@@ -1,3 +1,5 @@
+from typing import Tuple
+
 import torch
 import torch.nn as nn
 
@@ -7,27 +9,19 @@ class NTXent(nn.Module):
     Compute NT-Xent loss for contrastive learning.
     """
 
-    def __init__(self, batch_len, temperature=0.25, in_features=626, mode="CS"):
+    def __init__(self, batch_len: int, temperature: float = 0.25):
         """
         Arguments:
         -- batch_len: batch size
         -- temperature: parameter
-        -- in_features: input vector dimensions
-        -- mode: cosine or bilinear similarity
         """
         super(NTXent, self).__init__()
 
         self.batch_len = batch_len
-        self.mode = mode
         self.temperature = temperature
+        self.CS = nn.CosineSimilarity(dim=1, eps=1e-08)
 
-        if mode == "CS":
-            self.CS = nn.CosineSimilarity(dim=1, eps=1e-08)
-
-        else:
-            self.CS = nn.Bilinear(in_features, in_features, 1, bias=False)
-
-    def forward(self, anchors, poss):
+    def forward(self, anchors: torch.Tensor, poss: torch.Tensor) -> Tuple[torch.Tensor, float, float]:
         """
         Arguments:
         -- anchors: tensor of shape (batch_len, embedding_size)
@@ -48,9 +42,7 @@ class NTXent(nn.Module):
             sim_num = sim_an_pos.exp()
 
             sim_an_png = self.CS(anchor, poss)
-            cos_an_neg += (sim_an_png.sum().item() - sim_an_png[xx].item()) / (
-                self.batch_len - 1
-            )
+            cos_an_neg += (sim_an_png.sum().item() - sim_an_png[xx].item()) / (self.batch_len - 1)
             sim_an_png = torch.div(sim_an_png, self.temperature)
             sim_den = sim_an_png.exp().sum()
 

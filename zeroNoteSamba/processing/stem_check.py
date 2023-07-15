@@ -1,8 +1,11 @@
+from typing import Any, Dict, Tuple
+
 import librosa as audio_lib
 import numpy as np
+import numpy.typing as npt
 
 
-def compute_rms(signal):
+def compute_rms(signal: npt.NDArray[np.float32]) -> Tuple[npt.NDArray[np.float32], float, float]:
     """
     Function for combining a signal's Root Mean Square (RMS) value.
     -- signal: input waveform
@@ -16,7 +19,9 @@ def compute_rms(signal):
     return rms, mean_rms, std_rms
 
 
-def check_CL_clips(anchor, positive, lower_p, upper_p):
+def check_CL_clips(
+    anchor: npt.NDArray[np.float32], positive: npt.NDArray[np.float32], lower_p: float, upper_p: float
+) -> bool:
     """
     Function for thresholding anchor vs positive. Goal is to make sure drum clip has enough energy.
     -- anchor: selected stem combination
@@ -46,7 +51,7 @@ def check_CL_clips(anchor, positive, lower_p, upper_p):
         return False
 
 
-def check_drum_stem(stems, ymldict):
+def check_drum_stem(stems: Dict[str, npt.NDArray[np.float32]], ymldict: Dict[str, Any]) -> bool:
     """
     Function for thresholding drums. Goal is to make sure drum clip has enough energy.
     -- stems: dictionary with stems and their names
@@ -66,30 +71,34 @@ def check_drum_stem(stems, ymldict):
             drum_rms, _, _ = compute_rms(sig.T)
         else:
             if rest_of_sig is None:
-                rest_of_sig = np.zeros((len(sig), 2))
+                rest_of_sig = np.zeros((len(sig), 2), dtype=np.float32)
                 rest_of_sig[:, :] = sig[:, :]
 
             else:
                 rest_of_sig[:, :] += sig[:, :]
 
-    if check_drum == False:
+    if check_drum is False:
         raise Exception("Stems do not contain any drum tracks!")
 
-    ros_rms, _, _ = compute_rms(rest_of_sig.T)
+    if rest_of_sig is not None:
+        ros_rms, _, _ = compute_rms(rest_of_sig.T)
 
-    # rms_check = np.where(rms[0] > threshold, 1, 0)
-    rms_check1 = drum_rms[:] > ros_rms[:] / 2
-    rms_check2 = drum_rms[:] < ros_rms[:] * 4
-    rms_check1 = rms_check1.astype(int)[0]
-    rms_check2 = rms_check2.astype(int)[0]
-    rms_check = rms_check1[:] * rms_check2[:]
-    rms_sum = np.sum(rms_check)
-    rms_perc = rms_sum / len(rms_check)
+        # rms_check = np.where(rms[0] > threshold, 1, 0)
+        rms_check1 = drum_rms[:] > ros_rms[:] / 2
+        rms_check2 = drum_rms[:] < ros_rms[:] * 4
+        rms_check1 = rms_check1.astype(int)[0]
+        rms_check2 = rms_check2.astype(int)[0]
+        rms_check = rms_check1[:] * rms_check2[:]
+        rms_sum = np.sum(rms_check)
+        rms_perc = rms_sum / len(rms_check)
 
-    print("   RMS Pow% : {}".format(rms_perc))
+        print("   RMS Pow% : {}".format(rms_perc))
 
-    if lower_p < rms_perc < upper_p:
-        return True
+        if lower_p < rms_perc < upper_p:
+            return True
+
+        else:
+            return False
 
     else:
-        return False
+        raise Exception("Rest-of-signal is still None.")

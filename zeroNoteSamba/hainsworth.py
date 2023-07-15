@@ -1,25 +1,23 @@
 import pickle
 
-import beat_down as BD
-import data_exp as DE
 import librosa as audio_lib
 import numpy as np
-import old_school as DP
-import processing.input_rep as IR
-import processing.source_separation as source_separation
-
-# File imports
-import processing.utilities as utils
 import torch
 import yaml
-
 from spleeter.separator import Separator
+
+import zeroNoteSamba.beat_down as BD
+import zeroNoteSamba.data_exp as DE
+import zeroNoteSamba.old_school as DP
+import zeroNoteSamba.processing.input_rep as IR
+import zeroNoteSamba.processing.source_separation as source_separation
+import zeroNoteSamba.processing.utilities as utils
 
 if __name__ == "__main__":
     save = True
 
     # Load YAML file configuations
-    stream = open("configuration/config.yaml", "r")
+    stream = open("zeroNoteSamba/configuration/config.yaml", "r")
     ymldict = yaml.safe_load(stream)
 
     hainsworth_status = ymldict.get("hainsworth_status")
@@ -82,30 +80,31 @@ if __name__ == "__main__":
 
                 print("{} -- {} :: {}".format(idx, file_path, len(sig)))
 
-                temp_stems = source_separation.wv_run_spleeter(
-                    sig, 44100, separator, model
-                )
+                temp_stems = source_separation.wv_run_spleeter(sig, 44100, separator, model)
 
                 anchor = None
                 for name, sig in temp_stems.items():
                     if name == "drums":
-                        possignal = np.zeros(sig.shape)
+                        possignal = np.zeros(sig.shape, dtype=np.float32)
                         possignal[:, :] = sig[:, :]
 
                     else:
                         if anchor is None:
-                            anchor = np.zeros(sig.shape)
+                            anchor = np.zeros(sig.shape, dtype=np.float32)
                             anchor[:, :] = sig[:, :]
 
                         else:
                             anchor[:, :] += sig[:, :]
 
-                anchor = utils.convert_to_mono(anchor)
-                anchor = audio_lib.resample(anchor, 44100, 16000)
-                possignal = utils.convert_to_mono(possignal)
-                possignal = audio_lib.resample(possignal, 44100, 16000)
+                if anchor is None:
+                    raise Exception("Anchor is still None.")
 
-                sigs = np.zeros((anchor.shape[0], 2))
+                anchor = utils.convert_to_mono(anchor)
+                anchor = audio_lib.resample(y=anchor, orig_sr=44100, target_sr=16000)
+                possignal = utils.convert_to_mono(possignal)
+                possignal = audio_lib.resample(y=possignal, orig_sr=44100, target_sr=16000)
+
+                sigs = np.zeros((anchor.shape[0], 2), dtype=np.float32)
                 sigs[:, 0] = anchor[:]
                 sigs[:, 1] = possignal[:]
 
@@ -161,16 +160,16 @@ if __name__ == "__main__":
                     b_pulse = torch.zeros(VQT.shape[1])
 
             beat = beats[idx]
-            down = downs[idx]
+            doww = downs[idx]
 
-            beat = np.asarray(beat.split(","), dtype=float)
-            down = np.asarray(down.split(","), dtype=int)
+            beat_str = np.asarray(beat.split(","), dtype=float)
+            down_str = np.asarray(doww.split(","), dtype=int)
 
             beat_tmz = []
             down_tmz = []
 
-            for xx in range(len(beat)):
-                b = beat[xx] / 44100
+            for xx in range(len(beat_str)):
+                b = beat_str[xx] / 44100
                 d = xx + 1
 
                 beat_tmz.append(b)
@@ -182,7 +181,7 @@ if __name__ == "__main__":
                 if temp == 0:
                     temp = 1
 
-                if d in down:
+                if str(d) in doww:
                     down_tmz.append(b)
                     d_pulse[temp] = 1
                     d_pulse[temp - 1] = 0.5
@@ -269,14 +268,10 @@ if __name__ == "__main__":
         DP.dp_ellis(wavs, signals, real_beat_times)
 
     elif _exp == "beat":
-        _ = BD.train_model(
-            wavs, vqts, beat_pulse, real_beat_times, "hainsworth", ymldict
-        )
+        _ = BD.train_model(wavs, vqts, beat_pulse, real_beat_times, "hainsworth", ymldict)
 
     elif _exp == "perc":
-        _ = DE.train_model(
-            wavs, vqts, beat_pulse, real_beat_times, "hainsworth", ymldict
-        )
+        _ = DE.train_model(wavs, vqts, beat_pulse, real_beat_times, "hainsworth", ymldict)
 
     else:
         print("YAML file for Hainsworth data set has a bug in experiment definition!")

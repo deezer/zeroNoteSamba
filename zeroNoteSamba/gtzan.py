@@ -1,27 +1,25 @@
 import os
 import pickle
 
-import beat_down as BD
-import data_exp as DE
-import jams
+import jams  # type: ignore
 import librosa as audio_lib
 import numpy as np
-import old_school as DP
-import processing.input_rep as IR
-import processing.source_separation as source_separation
-
-# File imports
-import processing.utilities as utils
 import torch
 import yaml
-
 from spleeter.separator import Separator
+
+import zeroNoteSamba.beat_down as BD
+import zeroNoteSamba.data_exp as DE
+import zeroNoteSamba.old_school as DP
+import zeroNoteSamba.processing.input_rep as IR
+import zeroNoteSamba.processing.source_separation as source_separation
+import zeroNoteSamba.processing.utilities as utils
 
 if __name__ == "__main__":
     saved = True
 
     # Load YAML file configuations
-    stream = open("configuration/config.yaml", "r")
+    stream = open("zeroNoteSamba/configuration/config.yaml", "r")
     ymldict = yaml.safe_load(stream)
 
     gtzan_status = ymldict.get("gtzan_status")
@@ -63,30 +61,31 @@ if __name__ == "__main__":
 
                         print("{} :: {} -- {}".format(idx, fp, len(sig)))
 
-                        temp_stems = source_separation.wv_run_spleeter(
-                            sig, 44100, separator, model
-                        )
+                        temp_stems = source_separation.wv_run_spleeter(sig, 44100, separator, model)
 
                         anchor = None
                         for name, sig in temp_stems.items():
                             if name == "drums":
-                                possignal = np.zeros(sig.shape)
+                                possignal = np.zeros(sig.shape, dtype=np.float32)
                                 possignal[:, :] = sig[:, :]
 
                             else:
                                 if anchor is None:
-                                    anchor = np.zeros(sig.shape)
+                                    anchor = np.zeros(sig.shape, dtype=np.float32)
                                     anchor[:, :] = sig[:, :]
 
                                 else:
                                     anchor[:, :] += sig[:, :]
 
-                        anchor = utils.convert_to_mono(anchor)
-                        anchor = audio_lib.resample(anchor, 44100, 16000)
-                        possignal = utils.convert_to_mono(possignal)
-                        possignal = audio_lib.resample(possignal, 44100, 16000)
+                        if anchor is None:
+                            raise Exception("Anchor is still None.")
 
-                        sigs = np.zeros((anchor.shape[0], 2))
+                        anchor = utils.convert_to_mono(anchor)
+                        anchor = audio_lib.resample(y=anchor, orig_sr=44100, target_sr=16000)
+                        possignal = utils.convert_to_mono(possignal)
+                        possignal = audio_lib.resample(y=possignal, orig_sr=44100, target_sr=16000)
+
+                        sigs = np.zeros((anchor.shape[0], 2), dtype=np.float32)
                         sigs[:, 0] = anchor[:]
                         sigs[:, 1] = possignal[:]
 
@@ -96,18 +95,12 @@ if __name__ == "__main__":
                             VQT1 = IR.generate_XQT(signals[fp][:, 0], 16000, "vqt")
                             VQT2 = IR.generate_XQT(signals[fp][:, 1], 16000, "vqt")
 
-                            VQT = np.zeros(
-                                (2, VQT1.shape[0], VQT1.shape[1]), dtype=float
-                            )
+                            VQT = np.zeros((2, VQT1.shape[0], VQT1.shape[1]), dtype=float)
                             VQT[0, :, :] = VQT1[:, :]
                             VQT[1, :, :] = VQT2[:, :]
 
                             vqts = {}
-                            print(
-                                "VQT shape: ({} * {})".format(
-                                    VQT.shape[1], VQT.shape[2]
-                                )
-                            )
+                            print("VQT shape: ({} * {})".format(VQT.shape[1], VQT.shape[2]))
                             vqts[fp] = torch.from_numpy(VQT).float()
                             d_pulse = torch.zeros(VQT.shape[2])
                             b_pulse = torch.zeros(VQT.shape[2])
@@ -120,11 +113,7 @@ if __name__ == "__main__":
                             VQT[0, :, :] = VQT1[:, :]
                             VQT[1, :, :] = VQT2[:, :]
 
-                            print(
-                                "VQT shape: ({} * {})".format(
-                                    VQT.shape[1], VQT.shape[2]
-                                )
-                            )
+                            print("VQT shape: ({} * {})".format(VQT.shape[1], VQT.shape[2]))
                             vqts[fp] = torch.from_numpy(VQT).float()
                             d_pulse = torch.zeros(VQT.shape[2])
                             b_pulse = torch.zeros(VQT.shape[2])
@@ -139,22 +128,14 @@ if __name__ == "__main__":
                         if idx == 0:
                             VQT = IR.generate_XQT(signals[fp], 16000, "vqt")
                             vqts = {}
-                            print(
-                                "VQT shape: ({} * {})".format(
-                                    VQT.shape[0], VQT.shape[1]
-                                )
-                            )
+                            print("VQT shape: ({} * {})".format(VQT.shape[0], VQT.shape[1]))
                             vqts[fp] = torch.from_numpy(VQT).float()
                             d_pulse = torch.zeros(VQT.shape[1])
                             b_pulse = torch.zeros(VQT.shape[1])
 
                         else:
                             VQT = IR.generate_XQT(signals[fp], 16000, "vqt")
-                            print(
-                                "VQT shape: ({} * {})".format(
-                                    VQT.shape[0], VQT.shape[1]
-                                )
-                            )
+                            print("VQT shape: ({} * {})".format(VQT.shape[0], VQT.shape[1]))
                             vqts[fp] = torch.from_numpy(VQT).float()
                             d_pulse = torch.zeros(VQT.shape[1])
                             b_pulse = torch.zeros(VQT.shape[1])

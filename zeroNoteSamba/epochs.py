@@ -1,19 +1,22 @@
+from typing import Any, Dict, List, Tuple
+
 import torch
-from processing.evaluate import beat_tracking as eval
+
+from zeroNoteSamba.processing.evaluate import beat_tracking as eval
 
 
 def train_epoch(
-    model,
-    criterion,
-    optimizer,
-    _status,
-    indices,
-    real_times,
-    inputs,
-    masks,
-    threshold,
-    librosa,
-):
+    model: torch.nn.Module,
+    criterion: torch.nn.BCELoss,
+    optimizer: torch.optim.Adam,
+    _status: str,
+    indices: List[str],
+    real_times: Dict[str, Any],
+    inputs: Dict[str, Any],
+    masks: Dict[str, Any],
+    threshold: bool,
+    librosa: bool,
+) -> Tuple[torch.nn.Module, torch.optim.Adam, float, float, float, float, float, float, float]:
     """
     Training epoch.
     -- model: model to train
@@ -44,12 +47,8 @@ def train_epoch(
 
         if _status == "pretrained":
             vqt = inputs[wav]
-            vqt1 = torch.reshape(
-                vqt[0, :, :], (1, 1, vqt.shape[1], vqt.shape[2])
-            ).cuda()
-            vqt2 = torch.reshape(
-                vqt[1, :, :], (1, 1, vqt.shape[1], vqt.shape[2])
-            ).cuda()
+            vqt1 = torch.reshape(vqt[0, :, :], (1, 1, vqt.shape[1], vqt.shape[2])).cuda()
+            vqt2 = torch.reshape(vqt[1, :, :], (1, 1, vqt.shape[1], vqt.shape[2])).cuda()
 
             msk = masks[wav]
             msk = torch.reshape(msk, (1, msk.shape[0])).cuda()
@@ -103,8 +102,16 @@ def train_epoch(
 
 
 def val_epoch(
-    model, criterion, _status, indices, real_times, inputs, masks, threshold, librosa
-):
+    model: torch.nn.Module,
+    criterion: torch.nn.BCELoss,
+    _status: str,
+    indices: List[str],
+    real_times: Dict[str, Any],
+    inputs: Dict[str, Any],
+    masks: Dict[str, Any],
+    threshold: bool,
+    librosa: bool,
+) -> Tuple[float, float, float, float, float, float, float]:
     """
     Validation epoch.
     -- model: model to train
@@ -135,12 +142,8 @@ def val_epoch(
 
             if _status == "pretrained":
                 vqt = inputs[wav]
-                vqt1 = torch.reshape(
-                    vqt[0, :, :], (1, 1, vqt.shape[1], vqt.shape[2])
-                ).cuda()
-                vqt2 = torch.reshape(
-                    vqt[1, :, :], (1, 1, vqt.shape[1], vqt.shape[2])
-                ).cuda()
+                vqt1 = torch.reshape(vqt[0, :, :], (1, 1, vqt.shape[1], vqt.shape[2])).cuda()
+                vqt2 = torch.reshape(vqt[1, :, :], (1, 1, vqt.shape[1], vqt.shape[2])).cuda()
 
                 msk = masks[wav]
                 msk = torch.reshape(msk, (1, msk.shape[0])).cuda()
@@ -151,9 +154,7 @@ def val_epoch(
 
             else:
                 vqt = inputs[wav]
-                vqt = torch.reshape(
-                    vqt[:, :], (1, 1, vqt.shape[0], vqt.shape[1])
-                ).cuda()
+                vqt = torch.reshape(vqt[:, :], (1, 1, vqt.shape[0], vqt.shape[1])).cuda()
 
                 msk = masks[wav]
                 msk = torch.reshape(msk, (1, msk.shape[0])).cuda()

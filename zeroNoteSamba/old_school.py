@@ -1,10 +1,12 @@
+from typing import Any, Dict, List
+
 import librosa
-import mir_eval
+import mir_eval  # type: ignore
 import numpy as np
 from tqdm import tqdm
 
 
-def dp_ellis(wavs, signals, real_times):
+def dp_ellis(wavs: List[str], signals: Dict[str, Any], real_times: Dict[str, Any]) -> None:
     """
     Function for running librosa's algorithm for beat tracking.
     -- wavs: list of files
@@ -32,12 +34,8 @@ def dp_ellis(wavs, signals, real_times):
         reference_beats = np.array(times)
         reference_beats = mir_eval.beat.trim_beats(reference_beats)
 
-        f_measure = mir_eval.beat.f_measure(
-            reference_beats, estimated_beats, f_measure_threshold=0.07
-        )
-        cmlc, cmlt, amlc, amlt = mir_eval.beat.continuity(
-            reference_beats, estimated_beats
-        )
+        f_measure = mir_eval.beat.f_measure(reference_beats, estimated_beats, f_measure_threshold=0.07)
+        cmlc, cmlt, amlc, amlt = mir_eval.beat.continuity(reference_beats, estimated_beats)
         info_gain = mir_eval.beat.information_gain(reference_beats, estimated_beats)
 
         test_f_measure.append(f_measure)
@@ -49,35 +47,11 @@ def dp_ellis(wavs, signals, real_times):
 
     print("\n-- Full Set --")
 
-    print(
-        "Mean F1-score is {:.3f} +- {:.3f}.".format(
-            np.mean(test_f_measure), np.std(test_f_measure)
-        )
-    )
-    print(
-        "Mean CMLC     is {:.3f} +- {:.3f}.".format(
-            np.mean(test_cmlc), np.std(test_cmlc)
-        )
-    )
-    print(
-        "Mean CMLT     is {:.3f} +- {:.3f}.".format(
-            np.mean(test_cmlt), np.std(test_cmlt)
-        )
-    )
-    print(
-        "Mean AMLC     is {:.3f} +- {:.3f}.".format(
-            np.mean(test_amlc), np.std(test_amlc)
-        )
-    )
-    print(
-        "Mean AMLT     is {:.3f} +- {:.3f}.".format(
-            np.mean(test_amlt), np.std(test_amlt)
-        )
-    )
-    print(
-        "Mean InfoGain is {:.3f} +- {:.3f}.".format(
-            np.mean(test_info_gain), np.std(test_info_gain)
-        )
-    )
+    print("Mean F1-score is {:.3f} +- {:.3f}.".format(np.mean(test_f_measure), np.std(test_f_measure)))
+    print("Mean CMLC     is {:.3f} +- {:.3f}.".format(np.mean(test_cmlc), np.std(test_cmlc)))
+    print("Mean CMLT     is {:.3f} +- {:.3f}.".format(np.mean(test_cmlt), np.std(test_cmlt)))
+    print("Mean AMLC     is {:.3f} +- {:.3f}.".format(np.mean(test_amlc), np.std(test_amlc)))
+    print("Mean AMLT     is {:.3f} +- {:.3f}.".format(np.mean(test_amlt), np.std(test_amlt)))
+    print("Mean InfoGain is {:.3f} +- {:.3f}.".format(np.mean(test_info_gain), np.std(test_info_gain)))
 
     return

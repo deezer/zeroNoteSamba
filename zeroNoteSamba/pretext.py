@@ -3,21 +3,23 @@ import pickle
 import random
 import shutil
 from random import randint
+from typing import Dict, List, SupportsFloat, Tuple, Union
 
 import librosa as audio_lib
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt  # type: ignore
 import numpy as np
-import processing.input_rep as input_rep
-
-# File imports
-import processing.stem_check as stem_check
+import numpy.typing as npt
 import torch
 import yaml
-from fma_loader import gen_clmr
-from models.loss_functions import NTXent
-from models.models import DS_CNN, Pretext_CNN
 from torch.utils.data import DataLoader, TensorDataset
 from tqdm import tqdm, trange
+from typing_extensions import Buffer, SupportsIndex
+
+import zeroNoteSamba.processing.input_rep as input_rep
+import zeroNoteSamba.processing.stem_check as stem_check
+from zeroNoteSamba.fma_loader import gen_clmr
+from zeroNoteSamba.models.loss_functions import NTXent
+from zeroNoteSamba.models.models import DS_CNN, Pretext_CNN
 
 device0 = torch.device("cuda:0")
 device1 = torch.device("cuda:1")
@@ -25,7 +27,9 @@ device1 = torch.device("cuda:1")
 plt.rcParams["figure.figsize"] = (15, 5)
 
 
-def drum_anchor_positive(stems, ymldict):
+def drum_anchor_positive(
+    stems: Dict[str, npt.NDArray[np.float32]], ymldict: Dict[str, Union[SupportsFloat, SupportsIndex, str, Buffer]]
+) -> Tuple[npt.NDArray[np.float32], npt.NDArray[np.float32], npt.NDArray[np.float32], npt.NDArray[np.float32]]:
     """
     Function for generating anchor and positive samples.
     -- stems: dictionary of stem names and signals
@@ -34,10 +38,10 @@ def drum_anchor_positive(stems, ymldict):
     rms_bool = False
 
     # Load YAML variables
-    length = ymldict.get("clip_len")
-    mode = ymldict.get("input_mode")
-    lower_p = ymldict.get("lower_p")
-    upper_p = ymldict.get("upper_p")
+    length = int(float(ymldict.get("clip_len", -1)))
+    mode = str(ymldict.get("input_mode", ""))
+    lower_p = float(ymldict.get("lower_p", -1.0))
+    upper_p = float(ymldict.get("upper_p", -1.0))
 
     idx = 0
 
@@ -45,16 +49,19 @@ def drum_anchor_positive(stems, ymldict):
 
     for name, sig in stems.items():
         if name == "drums":
-            possignal = np.zeros(len(sig))
+            possignal = np.zeros(len(sig), dtype=np.float32)
             possignal[:] = sig[:]
 
         else:
             if anchor is None:
-                anchor = np.zeros(len(sig))
+                anchor = np.zeros(len(sig), dtype=np.float32)
                 anchor[:] = sig[:]
 
             else:
                 anchor[:] += sig[:]
+
+    if anchor is None:
+        raise Exception("Anchor is still None.")
 
     while rms_bool == False:
         # Largest possible stop sample index
@@ -66,9 +73,7 @@ def drum_anchor_positive(stems, ymldict):
         temp_anchor = anchor[ran : ran + length * 16000]
         temp_possignal = possignal[ran : ran + length * 16000]
 
-        rms_bool = stem_check.check_CL_clips(
-            temp_anchor, temp_possignal, lower_p, upper_p
-        )
+        rms_bool = stem_check.check_CL_clips(temp_anchor, temp_possignal, lower_p, upper_p)
 
         idx += 1
 
@@ -81,7 +86,12 @@ def drum_anchor_positive(stems, ymldict):
     return anchor, possignal, anchor_cqt, possignal_cqt
 
 
-def create_memory_bank(number_of_samples, ymldict, fps, pkl_fp):
+def create_memory_bank(
+    number_of_samples: int,
+    ymldict: Dict[str, Union[SupportsFloat, SupportsIndex, str, Buffer]],
+    fps: List[str],
+    pkl_fp: str,
+) -> Tuple[npt.NDArray[np.float32], Dict[str, Dict[str, npt.NDArray[np.float32]]], List[str]]:
     """
     Function for creationg a memory bank of anchors and their positives.
     -- number_of_samples: length of memory bank
@@ -102,10 +112,10 @@ def create_memory_bank(number_of_samples, ymldict, fps, pkl_fp):
     idx = 0
     for fp in tqdm(fps):
         temp = {}
-        temp["bass"], _ = audio_lib.load("new_data/" + fp + "/bass.wav", sr=None)
-        temp["drums"], _ = audio_lib.load("new_data/" + fp + "/drums.wav", sr=None)
-        temp["other"], _ = audio_lib.load("new_data/" + fp + "/other.wav", sr=None)
-        temp["vocals"], _ = audio_lib.load("new_data/" + fp + "/vocals.wav", sr=None)
+        temp["bass"], _ = audio_lib.load("new_data/" + fp + "/bass.wav", sr=None, dtype=np.float32)
+        temp["drums"], _ = audio_lib.load("new_data/" + fp + "/drums.wav", sr=None, dtype=np.float32)
+        temp["other"], _ = audio_lib.load("new_data/" + fp + "/other.wav", sr=None, dtype=np.float32)
+        temp["vocals"], _ = audio_lib.load("new_data/" + fp + "/vocals.wav", sr=None, dtype=np.float32)
 
         if len(temp["vocals"]) < 16000 * 10:
             print("File path {} is problematic.".format(fp))
@@ -130,7 +140,7 @@ def create_memory_bank(number_of_samples, ymldict, fps, pkl_fp):
 
     _, _, anchor_cqt, possignal_cqt = drum_anchor_positive(temp_stems, ymldict)
 
-    bank = np.zeros((number_of_samples, 2, anchor_cqt.shape[0], anchor_cqt.shape[1]))
+    bank = np.zeros((number_of_samples, 2, anchor_cqt.shape[0], anchor_cqt.shape[1]), dtype=np.float32)
     bank[0, 0, :, :] = anchor_cqt[:, :]
     bank[0, 1, :, :] = possignal_cqt[:, :]
 
@@ -162,7 +172,9 @@ def create_memory_bank(number_of_samples, ymldict, fps, pkl_fp):
     return bank, all_stems, fps
 
 
-def train_model(ymldict, saved=True):
+def train_model(
+    ymldict: Dict[str, Union[SupportsFloat, SupportsIndex, str, Buffer]], saved: bool = True
+) -> torch.nn.Module:
     """
     Function for training a model.
     Steps include batch creation and calls to training epoch.
@@ -170,16 +182,16 @@ def train_model(ymldict, saved=True):
     -- saved: whether pkl files have been saved
     """
     # Load YAML parameters
-    val_len = ymldict.get("val_len")
-    train_pkl = ymldict.get("train_pkl")
-    batch_len = ymldict.get("batch_size")
-    epochs = ymldict.get("num_epochs")
-    tmp = ymldict.get("temp")
+    val_len = int(float(ymldict.get("val_len", -1)))
+    train_pkl = int(float(ymldict.get("train_pkl", -1)))
+    batch_len = int(float(ymldict.get("batch_size", -1)))
+    epochs = int(float(ymldict.get("num_epochs", -1)))
+    tmp = float(ymldict.get("temp", -1.0))
     pt_task = ymldict.get("pt_task")
 
     fps = os.listdir("ddesblancs/new_data/")
     random.shuffle(fps)
-
+    model: torch.nn.Module
     # Model, optimizer, criterion...
     if pt_task == "zerons":
         criterion = NTXent(batch_len=batch_len, temperature=tmp).to(device1)
@@ -216,9 +228,7 @@ def train_model(ymldict, saved=True):
                 print("Saving pkl files!")
 
                 if pt_task == "zerons":
-                    _, _, fps = create_memory_bank(
-                        val_len, ymldict, fps, "data/Validation/val_bank.pkl"
-                    )
+                    _, _, fps = create_memory_bank(val_len, ymldict, fps, "data/Validation/val_bank.pkl")
 
                     for xx in trange(10):
                         _, _, fps = create_memory_bank(
@@ -246,12 +256,8 @@ def train_model(ymldict, saved=True):
                     val_bank = np.zeros((6400, 2, 96, 626), dtype=np.float32)
 
                     for xx in trange(10):
-                        with open(
-                            "data/Train/train_bank_{}.pkl".format(xx), "rb"
-                        ) as handle:
-                            train_bank[
-                                xx * 2880 : xx * 2880 + 2880, :, :, :
-                            ] = pickle.load(handle)[:, :, :, :]
+                        with open("data/Train/train_bank_{}.pkl".format(xx), "rb") as handle:
+                            train_bank[xx * 2880 : xx * 2880 + 2880, :, :, :] = pickle.load(handle)[:, :, :, :]
 
                     with open("data/Validation/val_bank.pkl", "rb") as handle:
                         val_bank[:, :, :, :] = pickle.load(handle)[:, :, :, :]
@@ -261,9 +267,7 @@ def train_model(ymldict, saved=True):
 
                     for xx in trange(50):
                         with open("data/CLMR/clmr_pkl_{}".format(xx), "rb") as handle:
-                            bank[xx * 2048 : xx * 2048 + 2048, :, :, :] = pickle.load(
-                                handle
-                            )[:, :, :, :]
+                            bank[xx * 2048 : xx * 2048 + 2048, :, :, :] = pickle.load(handle)[:, :, :, :]
 
                     print("Creating datasets...")
                     np.random.shuffle(bank)
@@ -278,18 +282,14 @@ def train_model(ymldict, saved=True):
             np.random.shuffle(train_bank)
 
             if epoch == 0:
-                new_val_bank = np.zeros(
-                    (6400 * batch_len, 2, 96, 313), dtype=np.float32
-                )
+                new_val_bank = np.zeros((6400 * batch_len, 2, 96, 313), dtype=np.float32)
 
                 print("Creating new validation shifts...")
                 for xx in trange(6400):
                     randomlist = random.sample(range(0, 313), batch_len)
 
                     for ii, start_idx in enumerate(randomlist):
-                        new_val_bank[xx * batch_len + ii, :, :, :] = val_bank[
-                            xx, :, :, start_idx : start_idx + 313
-                        ]
+                        new_val_bank[xx * batch_len + ii, :, :, :] = val_bank[xx, :, :, start_idx : start_idx + 313]
 
         elif pt_task == "clmr":
             np.random.shuffle(train_bank)
@@ -306,9 +306,7 @@ def train_model(ymldict, saved=True):
 
         if pt_task == "zerons":
             for jj in range(20):
-                new_train_bank = np.zeros(
-                    (1440 * batch_len, 2, 96, 313), dtype=np.float32
-                )
+                new_train_bank = np.zeros((1440 * batch_len, 2, 96, 313), dtype=np.float32)
 
                 print("{} : Creating new training shifts...".format(jj))
                 for xx in trange(1440):
@@ -337,11 +335,7 @@ def train_model(ymldict, saved=True):
 
         elif pt_task == "clmr":
             for zz in range(20):
-                train_ds = TensorDataset(
-                    torch.tensor(
-                        train_bank[zz * 4096 : zz * 4096 + 4096, :, :, :]
-                    ).float()
-                )
+                train_ds = TensorDataset(torch.tensor(train_bank[zz * 4096 : zz * 4096 + 4096, :, :, :]).float())
                 train_loader = DataLoader(train_ds, batch_size=batch_len, shuffle=True)
 
                 # Train epoch
@@ -351,9 +345,7 @@ def train_model(ymldict, saved=True):
                     temp_train_loss,
                     temp_train_anpos,
                     temp_train_anneg,
-                ) = train_epoch(
-                    model, train_loader, criterion, optimizer, pt_task="clmr"
-                )
+                ) = train_epoch(model, train_loader, criterion, optimizer, pt_task="clmr")
 
                 full_train_loss += temp_train_loss
                 full_train_anpos += temp_train_anpos
@@ -371,33 +363,19 @@ def train_model(ymldict, saved=True):
         train_an_neg.append(full_train_anneg)
 
         print("\n!!! Mean training batch loss is {:.3f}.".format(full_train_loss))
-        print(
-            "!!! Mean training anchor / positive similiarity is {:.3f}.".format(
-                full_train_anpos
-            )
-        )
-        print(
-            "!!! Mean training anchor / negative similiarity is {:.3f}.".format(
-                full_train_anneg
-            )
-        )
+        print("!!! Mean training anchor / positive similiarity is {:.3f}.".format(full_train_anpos))
+        print("!!! Mean training anchor / negative similiarity is {:.3f}.".format(full_train_anneg))
 
         print("\n{} : Validating...".format(epoch))
 
         if pt_task == "zerons":
             for zz in trange(10):
                 val_ds = TensorDataset(
-                    torch.tensor(
-                        new_val_bank[
-                            640 * batch_len * zz : 640 * batch_len * (zz + 1), :, :, :
-                        ]
-                    ).float()
+                    torch.tensor(new_val_bank[640 * batch_len * zz : 640 * batch_len * (zz + 1), :, :, :]).float()
                 )
                 val_loader = DataLoader(val_ds, batch_size=batch_len, shuffle=False)
 
-                temp_val_loss, temp_val_anpos, temp_val_anneg = val_epoch(
-                    model, val_loader, criterion, optimizer
-                )
+                temp_val_loss, temp_val_anpos, temp_val_anneg = val_epoch(model, val_loader, criterion, optimizer)
 
                 full_val_loss += temp_val_loss
                 full_val_anpos += temp_val_anpos
@@ -405,11 +383,7 @@ def train_model(ymldict, saved=True):
 
         elif pt_task == "clmr":
             for hh in trange(10):
-                val_ds = TensorDataset(
-                    torch.tensor(
-                        val_bank[hh * 2048 : hh * 2048 + 2048, :, :, :]
-                    ).float()
-                )
+                val_ds = TensorDataset(torch.tensor(val_bank[hh * 2048 : hh * 2048 + 2048, :, :, :]).float())
                 val_loader = DataLoader(val_ds, batch_size=batch_len, shuffle=False)
 
                 temp_val_loss, temp_val_anpos, temp_val_anneg = val_epoch(
@@ -428,16 +402,8 @@ def train_model(ymldict, saved=True):
         full_val_anneg /= 10
 
         print("\n!!! Mean validation batch loss is {:.3f}.".format(full_val_loss))
-        print(
-            "!!! Mean validation anchor / positive similiarity is {:.3f}.".format(
-                full_val_anpos
-            )
-        )
-        print(
-            "!!! Mean validation anchor / negative similiarity is {:.3f}.".format(
-                full_val_anneg
-            )
-        )
+        print("!!! Mean validation anchor / positive similiarity is {:.3f}.".format(full_val_anpos))
+        print("!!! Mean validation anchor / negative similiarity is {:.3f}.".format(full_val_anneg))
 
         # Save model
         if full_val_loss < best_val_loss:
@@ -484,7 +450,13 @@ def train_model(ymldict, saved=True):
     return model
 
 
-def train_epoch(model, train_loader, criterion, optimizer, pt_task="zerons"):
+def train_epoch(
+    model: torch.nn.Module,
+    train_loader: DataLoader[Tuple[torch.Tensor, ...]],
+    criterion: NTXent,
+    optimizer: torch.optim.Adam,
+    pt_task: str = "zerons",
+) -> Tuple[torch.nn.Module, float, float, float]:
     """
     Function for CL model training.
     -- model: model to train
@@ -546,21 +518,19 @@ def train_epoch(model, train_loader, criterion, optimizer, pt_task="zerons"):
     full_train_anneg = full_train_anneg / (batch_idx + 1)
 
     print("*** Mean training batch loss is {:.3f}.".format(full_train_loss))
-    print(
-        "*** Mean training anchor / positive similiarity is {:.3f}.".format(
-            full_train_anpos
-        )
-    )
-    print(
-        "*** Mean training anchor / negative similiarity is {:.3f}.".format(
-            full_train_anneg
-        )
-    )
+    print("*** Mean training anchor / positive similiarity is {:.3f}.".format(full_train_anpos))
+    print("*** Mean training anchor / negative similiarity is {:.3f}.".format(full_train_anneg))
 
     return model, full_train_loss, full_train_anpos, full_train_anneg
 
 
-def val_epoch(model, val_loader, criterion, optimizer, pt_task="zerons"):
+def val_epoch(
+    model: torch.nn.Module,
+    val_loader: DataLoader[Tuple[torch.Tensor, ...]],
+    criterion: NTXent,
+    optimizer: torch.optim.Adam,
+    pt_task: str = "zerons",
+) -> Tuple[float, float, float]:
     """
     Function for CL model training.
     -- model: model to train
@@ -624,7 +594,7 @@ def val_epoch(model, val_loader, criterion, optimizer, pt_task="zerons"):
 
 if __name__ == "__main__":
     # Load YAML file configurations
-    stream = open("configuration/config.yaml", "r")
+    stream = open("zeroNoteSamba/configuration/config.yaml", "r")
     ymldict = yaml.safe_load(stream)
 
     _ = train_model(ymldict, saved=True)

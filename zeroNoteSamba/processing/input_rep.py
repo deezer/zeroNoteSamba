@@ -1,12 +1,14 @@
 import os
+from typing import Optional
 
 import librosa as audio_lib
 import librosa.display as display
-import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt  # type: ignore
 import numpy as np
+import numpy.typing as npt
 
 
-def generate_XQT(signal, sample_rate, mode):
+def generate_XQT(signal: npt.NDArray[np.float32], sample_rate: int, mode: str) -> npt.NDArray[np.float32]:
     """
     Generates a high-resolution XQT spectrogram.
     -- signal: signal to compute XQT on
@@ -55,7 +57,9 @@ def generate_XQT(signal, sample_rate, mode):
         raise Exception("Mode can only be vqt or cqt!")
 
 
-def plot_XQT(cqt, sample_rate, title=None, save=None):
+def plot_XQT(
+    cqt: npt.NDArray[np.float32], sample_rate: int, title: Optional[str] = None, save: Optional[str] = None
+) -> None:
     """
     Function for plotting CQT.
     -- cqt: Constant Q-Transform matrix
@@ -64,9 +68,7 @@ def plot_XQT(cqt, sample_rate, title=None, save=None):
     """
     fig, ax = plt.subplots()
     dB = audio_lib.amplitude_to_db(cqt, ref=np.max)
-    img = display.specshow(
-        data=dB, sr=sample_rate, x_axis="time", y_axis="cqt_note", ax=ax
-    )
+    img = display.specshow(data=dB, sr=sample_rate, x_axis="time", y_axis="cqt_note", ax=ax)
 
     if title is not None:
         ax.set_title(title)
@@ -75,7 +77,7 @@ def plot_XQT(cqt, sample_rate, title=None, save=None):
 
     fig.colorbar(img, ax=ax, format="%+2.0f dB")
 
-    if save == None:
+    if save is None:
         plt.show()
 
     else:

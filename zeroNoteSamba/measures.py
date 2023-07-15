@@ -3,39 +3,41 @@ import os
 import pickle
 import random
 from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple, Union
 
-import antropy
+import antropy  # type: ignore
 import librosa
 import numpy as np
+import numpy.typing as npt
 import pandas as pd
-import processing.input_rep as IR
-import processing.utilities as utils
-import soundfile as sf
+import soundfile as sf  # type: ignore
 import torch
 import yaml
-from madmom.features.beats import RNNBeatProcessor
-from models.loss_functions import NTXent
-from models.models import DS_CNN, Down_CNN
+from madmom.features.beats import RNNBeatProcessor  # type: ignore
 from openpyxl import load_workbook
-from pretext import val_epoch
-from processing.source_separation import wv_run_spleeter
-from scipy.stats import kurtosis
+from scipy.stats import kurtosis  # type: ignore
+from spleeter.separator import Separator
 from torch.utils.data import DataLoader, TensorDataset
 from tqdm import trange
 
-from spleeter.separator import Separator
+import zeroNoteSamba.processing.input_rep as IR
+import zeroNoteSamba.processing.utilities as utils
+from zeroNoteSamba.models.loss_functions import NTXent
+from zeroNoteSamba.models.models import DS_CNN, Down_CNN
+from zeroNoteSamba.pretext import val_epoch
+from zeroNoteSamba.processing.source_separation import wv_run_spleeter
 
 proc = RNNBeatProcessor()
 
 
 def append_df_to_excel(
-    filename,
-    df,
-    sheet_name="Sheet1",
-    startrow=None,
-    truncate_sheet=False,
-    **to_excel_kwargs
-):
+    filename: str,
+    df: pd.DataFrame,
+    sheet_name: str = "Sheet1",
+    startrow: Optional[int] = None,
+    truncate_sheet: bool = False,
+    **to_excel_kwargs: Any,
+) -> None:
     """
     Append a DataFrame [df] to existing Excel file [filename]
     into [sheet_name] Sheet.
@@ -72,10 +74,7 @@ def append_df_to_excel(
     # Excel file doesn't exist - saving and exiting
     if not os.path.isfile(filename):
         df.to_excel(
-            filename,
-            sheet_name=sheet_name,
-            startrow=startrow if startrow is not None else 0,
-            **to_excel_kwargs
+            filename, sheet_name=sheet_name, startrow=startrow if startrow is not None else 0, **to_excel_kwargs
         )
         return
 
@@ -86,7 +85,7 @@ def append_df_to_excel(
     writer = pd.ExcelWriter(filename, engine="openpyxl", mode="a")
 
     # try to open an existing workbook
-    writer.book = load_workbook(filename)
+    writer.book = load_workbook(filename)  # type: ignore
 
     # get the last row in the existing Excel sheet
     # if it was not specified explicitly
@@ -103,7 +102,7 @@ def append_df_to_excel(
         writer.book.create_sheet(sheet_name, idx)
 
     # copy existing sheets
-    writer.sheets = {ws.title: ws for ws in writer.book.worksheets}
+    writer.sheets = {ws.title: ws for ws in writer.book.worksheets}  # type: ignore
 
     if startrow is None:
         startrow = 0
@@ -112,20 +111,20 @@ def append_df_to_excel(
     df.to_excel(writer, sheet_name, startrow=startrow, **to_excel_kwargs)
 
     # save the workbook
-    writer.save()
+    writer.save()  # type: ignore
 
     return
 
 
-def l2_l1_ratio(x):
+def l2_l1_ratio(x: npt.NDArray[np.float32]) -> float:
     """
     Ratio of l2 and l1 norms of a numpy array.
     -- x: array to be studied
     """
-    return np.linalg.norm(x, ord=2) / np.linalg.norm(x, ord=1)
+    return float(np.linalg.norm(x, ord=2) / np.linalg.norm(x, ord=1))
 
 
-def gini_index(x):
+def gini_index(x: npt.NDArray[np.float32]) -> float:
     """
     Gini coefficient of a numpy array.
     -- x: array to be studied
@@ -134,29 +133,29 @@ def gini_index(x):
     k = np.arange(1, x.shape[0] + 1)
     N = x.shape[0]
 
-    return (np.sum((2 * k - N - 1) * x)) / (N * np.sum(x))
+    return float((np.sum((2 * k - N - 1) * x)) / (N * np.sum(x)))
 
 
-def shannon_entropy(x):
+def shannon_entropy(x: npt.NDArray[np.float32]) -> float:
     """
     Shannon entropy of a numpy array.
     -- x: array to be studied
     """
     d = (np.linalg.norm(x, ord=2)) ** 2
-    n = x**2
+    n = x ** 2
     c = n / d
-    S = c * np.log(c**2)
+    S = c * np.log(c ** 2)
 
     if -np.sum(S) == float("+inf"):
-        S = c * np.log(c**2 + 10e-20)
+        S = c * np.log(c ** 2 + 10e-20)
 
     elif math.isnan(-np.sum(S)):
-        S = c * np.log(c**2 + 10e-20)
+        S = c * np.log(c ** 2 + 10e-20)
 
-    return -np.sum(S)
+    return float(-np.sum(S))
 
 
-def max_acf(x):
+def max_acf(x: npt.NDArray[np.float32]) -> float:
     """
     Auto-correlate embedding for maximum a second and return max AC value between 0.25 and 1s shifts.
     -- x: array to be studied
@@ -164,10 +163,10 @@ def max_acf(x):
     x = x - x.mean()
     ac = librosa.autocorrelate(x, max_size=250)
     ac = ac / ac[0]
-    return max(ac[15:])
+    return float(max(ac[15:]))
 
 
-def stats(embedding):
+def stats(embedding: npt.NDArray[np.float32]) -> Tuple[float, float, float, float, float, float, float]:
     """
     Function to calculate stats on embeddings.
     -- embedding: to be studied
@@ -183,7 +182,9 @@ def stats(embedding):
     return l2l1, gini, kurt, shan, appp, samp, acff
 
 
-def few_note_samba(file_path, beat_model, status, separator, spl_model, cuda_available):
+def few_note_samba(
+    file_path: str, beat_model: torch.nn.Module, status: str, separator: Separator, spl_model: str, cuda_available: bool
+) -> Any:
     """
     Function for processing raw audio with our beat tracker from A-Z.
     -- file_path: wav, mp3...to be processed
@@ -199,30 +200,33 @@ def few_note_samba(file_path, beat_model, status, separator, spl_model, cuda_ava
     anchor = None
     for name, sig in stems.items():
         if name == "drums":
-            possignal = np.zeros(sig.shape)
+            possignal = np.zeros(sig.shape, dtype=np.float32)
             possignal[:, :] = sig[:, :]
 
         else:
             if anchor is None:
-                anchor = np.zeros(sig.shape)
+                anchor = np.zeros(sig.shape, dtype=np.float32)
                 anchor[:, :] = sig[:, :]
 
             else:
                 anchor[:, :] += sig[:, :]
 
+    if anchor is None:
+        raise Exception("Anchor is still None.")
+
     anchor = utils.convert_to_mono(anchor)
-    anchor = librosa.resample(anchor, 44100, 16000)
+    anchor = librosa.resample(y=anchor, orig_sr=44100, target_sr=16000)
     possignal = utils.convert_to_mono(possignal)
-    possignal = librosa.resample(possignal, 44100, 16000)
+    possignal = librosa.resample(y=possignal, orig_sr=44100, target_sr=16000)
 
-    vqt1 = IR.generate_XQT(anchor, 16000, "vqt")
-    vqt2 = IR.generate_XQT(possignal, 16000, "vqt")
+    vqt1_arr = IR.generate_XQT(anchor, 16000, "vqt")
+    vqt2_arr = IR.generate_XQT(possignal, 16000, "vqt")
 
-    shape1 = vqt1.shape
-    shape2 = vqt2.shape
+    shape1 = vqt1_arr.shape
+    shape2 = vqt2_arr.shape
 
-    vqt1 = torch.from_numpy(vqt1).float().reshape(1, 1, shape1[0], shape1[1])
-    vqt2 = torch.from_numpy(vqt2).float().reshape(1, 1, shape2[0], shape2[1])
+    vqt1 = torch.from_numpy(vqt1_arr).float().reshape(1, 1, shape1[0], shape1[1])
+    vqt2 = torch.from_numpy(vqt2_arr).float().reshape(1, 1, shape2[0], shape2[1])
 
     if cuda_available == True:
         vqt1 = vqt1.cuda()
@@ -230,10 +234,10 @@ def few_note_samba(file_path, beat_model, status, separator, spl_model, cuda_ava
 
     with torch.no_grad():
         if status == "drums":
-            output = beat_model.pretext.postve(vqt2)
+            output = beat_model.pretext.postve(vqt2)  # type: ignore
 
         elif status == "ros":
-            output = beat_model.pretext.anchor(vqt1)
+            output = beat_model.pretext.anchor(vqt1)  # type: ignore
 
         else:
             output = beat_model(vqt1, vqt2)
@@ -241,7 +245,7 @@ def few_note_samba(file_path, beat_model, status, separator, spl_model, cuda_ava
     return output.squeeze(dim=0).cpu().detach().numpy()
 
 
-def vanilla_samba(file_path, beat_model, cuda_available):
+def vanilla_samba(file_path: str, beat_model: torch.nn.Module, cuda_available: bool) -> Any:
     """
     Function for processing raw audio with our beat tracker from A-Z.
     -- file_path: wav, mp3...to be processed
@@ -253,17 +257,17 @@ def vanilla_samba(file_path, beat_model, cuda_available):
     vqt = IR.generate_XQT(signal, 16000, "vqt")
     shape = vqt.shape
 
-    vqt = torch.from_numpy(vqt).float().reshape(1, 1, shape[0], shape[1])
+    vqt_torch = torch.from_numpy(vqt).float().reshape(1, 1, shape[0], shape[1])
 
     if cuda_available == True:
-        vqt = vqt.cuda()
+        vqt_torch = vqt_torch.cuda()
 
-    output = beat_model(vqt)
+    output = beat_model(vqt_torch)
 
     return output.squeeze(dim=0).cpu().detach().numpy()
 
 
-def bock_rnn(file_path):
+def bock_rnn(file_path: str) -> Any:
     """
     Function for processing audio through Bock's 2011 RNN.
     -- file_path: wav, mp3...to be processed
@@ -273,7 +277,7 @@ def bock_rnn(file_path):
     return output
 
 
-def gtzan_44100():
+def gtzan_44100() -> None:
     """
     Function for re-sampling GTZAN to 44100 and saving .wav files.
     """
@@ -296,16 +300,12 @@ def gtzan_44100():
 
                 sf.write("ddesblancs/gtzan/GTZAN/" + el + "/" + fp, y, 44100)
 
-                print(
-                    "{} -- Saved {}.".format(
-                        idx, "ddesblancs/gtzan/GTZAN/" + el + "/" + fp
-                    )
-                )
+                print("{} -- Saved {}.".format(idx, "ddesblancs/gtzan/GTZAN/" + el + "/" + fp))
 
                 idx += 1
 
 
-def check_inf(list_of_floats):
+def check_inf(list_of_floats: List[float]) -> bool:
     """
     Check if any list elements are inf.
     -- l: list
@@ -317,15 +317,14 @@ def check_inf(list_of_floats):
     return False
 
 
-def gtzan_stats(separator, spl_model, ymldict):
+def gtzan_stats(separator: Separator, spl_model: str, ymldict: Dict[str, Union[str, bool]]) -> None:
     """
     Function for iterating through the Gtzan dataset and computing measurements on embeddings.
     -- separator: Spleeter separator object
     -- spl_model: Spleeter model name
     """
     # Get experiment status
-    model = ymldict.get("spl_mod")
-    status = ymldict.get("meastatus")
+    status = str(ymldict.get("meastatus", ""))
 
     # Measures
     L2L1 = []
@@ -336,15 +335,15 @@ def gtzan_stats(separator, spl_model, ymldict):
     SAMP = []
     ACFF = []
 
+    model: torch.nn.Module
+
     # Define model
     if status == "drums" or status == "ros" or status == "mix" or status == "std":
         cuda_available = torch.cuda.is_available()
 
         model = Down_CNN()
 
-        state_dict = torch.load(
-            "models/saved/shift_pret_cnn_16.pth", map_location=torch.device("cpu")
-        )
+        state_dict = torch.load("models/saved/shift_pret_cnn_16.pth", map_location=torch.device("cpu"))
         model.pretext.load_state_dict(state_dict)
 
         if cuda_available == True:
@@ -361,9 +360,7 @@ def gtzan_stats(separator, spl_model, ymldict):
 
         model = DS_CNN()
 
-        state_dict = torch.load(
-            "models/saved/cross_ballroom_vanilla.pth", map_location=torch.device("cpu")
-        )
+        state_dict = torch.load("models/saved/cross_ballroom_vanilla.pth", map_location=torch.device("cpu"))
         model.load_state_dict(state_dict)
 
         if cuda_available == True:
@@ -376,9 +373,7 @@ def gtzan_stats(separator, spl_model, ymldict):
 
         model = DS_CNN()
 
-        state_dict = torch.load(
-            "models/saved/clmr_pret_cnn_16.pth", map_location=torch.device("cpu")
-        )
+        state_dict = torch.load("models/saved/clmr_pret_cnn_16.pth", map_location=torch.device("cpu"))
         model.load_state_dict(state_dict)
 
         if cuda_available == True:
@@ -409,57 +404,29 @@ def gtzan_stats(separator, spl_model, ymldict):
             randomlist = random.sample(range(0, 313), 16)
 
             for ii, start_idx in enumerate(randomlist):
-                new_val_bank[xx * 16 + ii, :, :, :] = val_bank[
-                    xx, :, :, start_idx : start_idx + 313
-                ]
+                new_val_bank[xx * 16 + ii, :, :, :] = val_bank[xx, :, :, start_idx : start_idx + 313]
 
         val_loss = []
         val_anpos = []
         val_anneg = []
 
         for zz in range(10):
-            val_ds = TensorDataset(
-                torch.tensor(
-                    new_val_bank[640 * 16 * zz : 640 * 16 * (zz + 1), :, :, :]
-                ).float()
-            )
+            val_ds = TensorDataset(torch.tensor(new_val_bank[640 * 16 * zz : 640 * 16 * (zz + 1), :, :, :]).float())
             val_loader = DataLoader(val_ds, batch_size=16, shuffle=False)
 
-            full_val_loss, full_val_anpos, full_val_anneg = val_epoch(
-                model, val_loader, criterion, optimizer
-            )
+            full_val_loss, full_val_anpos, full_val_anneg = val_epoch(model, val_loader, criterion, optimizer)
 
-            print(
-                "Mean validation loss: {} +/- {}.".format(
-                    np.mean(full_val_loss), np.std(full_val_loss)
-                )
-            )
-            print(
-                "Mean an/pos CS: {} +/- {}.".format(
-                    np.mean(full_val_anpos), np.std(full_val_anpos)
-                )
-            )
-            print(
-                "Mean an/neg CS: {} +/- {}.".format(
-                    np.mean(full_val_anneg), np.std(full_val_anneg)
-                )
-            )
+            print("Mean validation loss: {} +/- {}.".format(full_val_loss, full_val_loss))
+            print("Mean an/pos CS: {} +/- {}.".format(full_val_anpos, full_val_anpos))
+            print("Mean an/neg CS: {} +/- {}.".format(full_val_anneg, full_val_anneg))
 
-            val_loss += full_val_loss
-            val_anpos += full_val_anpos
-            val_anneg += full_val_anneg
+            val_loss.append(full_val_loss)
+            val_anpos.append(full_val_anpos)
+            val_anneg.append(full_val_anneg)
 
-        print(
-            "Full validation loss: {} +/- {}.".format(
-                np.mean(val_loss), np.std(val_loss)
-            )
-        )
-        print(
-            "Full an/pos CS: {} +/- {}.".format(np.mean(val_anpos), np.std(val_anpos))
-        )
-        print(
-            "Full an/neg CS: {} +/- {}.".format(np.mean(val_anneg), np.std(val_anneg))
-        )
+        print("Full validation loss: {} +/- {}.".format(np.mean(val_loss), np.std(val_loss)))
+        print("Full an/pos CS: {} +/- {}.".format(np.mean(val_anpos), np.std(val_anpos)))
+        print("Full an/neg CS: {} +/- {}.".format(np.mean(val_anneg), np.std(val_anneg)))
 
     else:
         al = os.listdir("ddesblancs/gtzan/GTZAN/")
@@ -475,9 +442,7 @@ def gtzan_stats(separator, spl_model, ymldict):
                     full_fp = "ddesblancs/gtzan/GTZAN/" + el + "/" + fp
 
                     if status == "drums" or status == "ros" or status == "mix":
-                        out = few_note_samba(
-                            full_fp, model, status, separator, spl_model, cuda_available
-                        )
+                        out = few_note_samba(full_fp, model, status, separator, spl_model, cuda_available)
 
                     elif status == "van" or status == "rand" or status == "clmr":
                         out = vanilla_samba(full_fp, model, cuda_available)
@@ -656,7 +621,7 @@ def gtzan_stats(separator, spl_model, ymldict):
 
 if __name__ == "__main__":
     # Load YAML file configuations
-    stream = open("configuration/config.yaml", "r")
+    stream = open("zeroNoteSamba/configuration/config.yaml", "r")
     ymldict = yaml.safe_load(stream)
     save = ymldict.get("measave")
 
