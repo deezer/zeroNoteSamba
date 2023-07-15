@@ -40,6 +40,7 @@ pyyaml = "^6.0"
 jams = "^0.3.4"
 spleeter = "^2.4.0"
 tqdm = "^4.65.0"
+ipython = "^8.14.0"
 
 [tool.poetry.dev-dependencies]
 mypy = "*"
