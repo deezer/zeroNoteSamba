@@ -51,8 +51,8 @@ other = (stems['other'][:, 0] + stems['other'][:, 1] \
         + stems['vocals'][:, 0] + stems['vocals'][:, 1] \
         + stems['bass'][:, 0] + stems['bass'][:, 1] ) / 2
 
-drums = librosa.resample(drums, 44100, 16000)
-other = librosa.resample(other, 44100, 16000)
+drums = librosa.resample(y=drums, orig_sr=44100, target_sr=16000)
+other = librosa.resample(y=other, orig_sr=44100, target_sr=16000)
 
 # Generate VQTs
 vqt_postve = torch.from_numpy(IR.generate_XQT(drums, 16000, 'vqt'))
