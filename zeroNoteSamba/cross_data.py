@@ -208,7 +208,7 @@ def train_model(
 
 if __name__ == "__main__":
     # Load YAML file configuations
-    stream = open("configuration/config.yaml", "r")
+    stream = open("zeroNoteSamba/configuration/config.yaml", "r")
     ymldict = yaml.safe_load(stream)
 
     _status = ymldict.get("cross_status")

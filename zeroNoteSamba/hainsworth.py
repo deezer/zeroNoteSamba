@@ -17,7 +17,7 @@ if __name__ == "__main__":
     save = True
 
     # Load YAML file configuations
-    stream = open("configuration/config.yaml", "r")
+    stream = open("zeroNoteSamba/configuration/config.yaml", "r")
     ymldict = yaml.safe_load(stream)
 
     hainsworth_status = ymldict.get("hainsworth_status")

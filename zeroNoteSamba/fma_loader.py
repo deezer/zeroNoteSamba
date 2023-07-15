@@ -177,7 +177,7 @@ def drum_load(
 
 if __name__ == "__main__":
     # Load YAML file configuations
-    stream = open("configuration/config.yaml", "r")
+    stream = open("zeroNoteSamba/configuration/config.yaml", "r")
     ymldict = yaml.safe_load(stream)
 
     # Load pretext task

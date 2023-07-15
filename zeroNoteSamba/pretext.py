@@ -594,7 +594,7 @@ def val_epoch(
 
 if __name__ == "__main__":
     # Load YAML file configurations
-    stream = open("configuration/config.yaml", "r")
+    stream = open("zeroNoteSamba/configuration/config.yaml", "r")
     ymldict = yaml.safe_load(stream)
 
     _ = train_model(ymldict, saved=True)
