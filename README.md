@@ -30,39 +30,48 @@ wget https://github.com/deezer/spleeter/raw/master/audio_example.mp3
 ```
 Note that Spleeter dependencies can be a little tricky to install. Please consult the package's [repository](https://github.com/deezer/spleeter) for proper installation instructions.
 
-One can then get started with the following Python code snippet in order to explore the trained model's outputs:
+One can then get started with the following Python code snippet in order to explore the trained model's outputs (also present in `sample_script.py`):
 
 ```python
 # Import functions and packages
-import torch
+import IPython.display as ipd
 import librosa
-import zeroNoteSamba.processing.input_rep as IR
-from zeroNoteSamba.models.models import Down_CNN
+import matplotlib.pyplot as plt  # type: ignore
+import numpy as np
+import torch
 from spleeter.separator import Separator
 
-# Run Spleeter and create percussive and non-percussive tracks
-separator = Separator('spleeter:4stems')
+import zeroNoteSamba.processing.input_rep as IR
+from zeroNoteSamba.models.models import Down_CNN
 
-y, _ = librosa.load('audio_example.mp3', sr=44100, mono=True)
+# Run Spleeter and create percussive and non-percussive tracks
+separator = Separator("spleeter:4stems")
+
+y, _ = librosa.load("audio_example.mp3", sr=44100, mono=True)
 stems = separator.separate(waveform=y.reshape((len(y), 1)))
 
-drums = (stems['drums'][:, 0] + stems['drums'][:, 1]) / 2
-other = (stems['other'][:, 0] + stems['other'][:, 1] \
-        + stems['vocals'][:, 0] + stems['vocals'][:, 1] \
-        + stems['bass'][:, 0] + stems['bass'][:, 1] ) / 2
+drums = (stems["drums"][:, 0] + stems["drums"][:, 1]) / 2
+other = (
+    stems["other"][:, 0]
+    + stems["other"][:, 1]
+    + stems["vocals"][:, 0]
+    + stems["vocals"][:, 1]
+    + stems["bass"][:, 0]
+    + stems["bass"][:, 1]
+) / 2
 
 drums = librosa.resample(y=drums, orig_sr=44100, target_sr=16000)
 other = librosa.resample(y=other, orig_sr=44100, target_sr=16000)
 
 # Generate VQTs
-vqt_postve = torch.from_numpy(IR.generate_XQT(drums, 16000, 'vqt'))
-vqt_anchor = torch.from_numpy(IR.generate_XQT(other, 16000, 'vqt'))
+vqt_postve = torch.from_numpy(IR.generate_XQT(drums, 16000, "vqt"))
+vqt_anchor = torch.from_numpy(IR.generate_XQT(other, 16000, "vqt"))
 
 vqt_postve = vqt_postve.reshape(1, 1, vqt_postve.shape[0], vqt_postve.shape[1])
 vqt_anchor = vqt_anchor.reshape(1, 1, vqt_anchor.shape[0], vqt_anchor.shape[1])
 
 # Load pretext task model weights
-device = torch.device('cpu')
+device = torch.device("cpu")
 model = Down_CNN()
 state_dict = torch.load("zeroNoteSamba/models/saved/shift_pret_cnn_16.pth", map_location=device)
 model.pretext.load_state_dict(state_dict)
@@ -91,7 +100,7 @@ The resulting embeddings should resemble the following outputs:
         <img src="https://github.com/deezer/zeroNoteSamba/blob/main/images/np_emb_sig.png" width="600">
 </p>
 
-The above script and code for plotting the embeddings can be found by running this [Colab notebook](https://colab.research.google.com/drive/1bdS_-SSQJalvLVNT4rtMRNeKFDuFnCAR?usp=sharing#scrollTo=avSYHOHNJEg-).
+The script and code for plotting the embeddings can be found in this [Colab notebook](https://colab.research.google.com/drive/1bdS_-SSQJalvLVNT4rtMRNeKFDuFnCAR?usp=sharing#scrollTo=avSYHOHNJEg-).
 
 ## Advanced Usage
 
