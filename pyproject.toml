@@ -31,14 +31,14 @@ packages = [ { include = "zeroNoteSamba" } ]
 
 [tool.poetry.dependencies]
 python = ">=3.9,<3.11"
-librosa = "0.10.0"
+librosa = "0.8.*"
 numpy = "<1.24.0"
-torch = "2.0.0"
+torch = "1.*"
 matplotlib = "^3.7.2"
 cython = "^0.29.36"
 pyyaml = "^6.0"
 jams = "^0.3.4"
-spleeter = "^2.4.0"
+spleeter = "2.3.*"
 tqdm = "^4.65.0"
 ipython = "^8.14.0"
 
