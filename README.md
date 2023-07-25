@@ -116,5 +116,11 @@ The code to generate the information-theoretic measures of ZeroNS network embedd
 If you use this repository, please consider citing:
 
 ```
-To be completed upon publication of the paper.
+@article{desblancs2023zero,
+  title={Zero-Note Samba: Self-Supervised Beat Tracking},
+  author={Desblancs, Dorian and Lostanlen, Vincent and Hennequin, Romain},
+  journal={IEEE/ACM Transactions on Audio, Speech, and Language Processing},
+  year={2023},
+  publisher={IEEE}
+}
 ```
